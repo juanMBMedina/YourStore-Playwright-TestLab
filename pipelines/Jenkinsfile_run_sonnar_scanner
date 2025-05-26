@@ -1,0 +1,106 @@
+def extractPropertyValue(file, property) {
+    return sh(script: """
+        grep "^${property}=" ${file} | sed "s/^${property}=//"
+    """, returnStdout: true).trim()
+}
+
+def validateExist(directory, mssg='The element ${directory} doesn\'t exist.'){
+    if(!fileExists(directory)){
+        error mssg
+    }
+}
+
+
+def copyFiles(originDir, finalDir){
+    validateExist(originDir)
+    validateExist(finalDir)
+    sh "cp -r ${originDir}/* ${finalDir}"
+}
+
+def sonarProps = [:]
+
+pipeline {
+    agent any
+    
+    environment{
+        SONAR_SCANNER_TEMP_DIR = '/var/jenkins_home/tmp/sonar-scanner' // Don't change it 
+    }
+
+    parameters {
+        string(name: 'REPO_DIR', defaultValue: '.', description: 'Repository of the project')
+    }
+
+    stages {
+        stage('Validating Project Directory') {
+            steps {
+                script {
+                    echo "Validating if the project directory: ${REPO_DIR} contains sonar-scanner.properties file"
+                    validateExist("${REPO_DIR}/sonar-scanner.properties", "sonar-scanner.properties file not found in ${params.REPO_DIR}")
+                    dir(REPO_DIR) {
+                        echo "sonar-scanner.properties file found!"
+                        sonarProps.projectName = extractPropertyValue('sonar-scanner.properties', 'sonar.projectName')
+                        sonarProps.projectKey = extractPropertyValue('sonar-scanner.properties', 'sonar.projectKey')
+                        sonarProps.sonarUrl = extractPropertyValue('sonar-scanner.properties', 'sonar.host.url')
+                        sonarProps.logsPath = extractPropertyValue('sonar-scanner.properties', 'sonar.log.path')
+                        echo "Project Name: ${sonarProps.projectName} Project Key: ${sonarProps.projectKey} Sonarqube url: ${sonarProps.sonarUrl}"
+                    }
+                }
+            }
+        }
+        
+        stage('Validating Connection to SonarQube') {
+            steps {
+                script {
+                    echo "Checking connection to SonarQube at ${sonarProps.sonarUrl}"
+                    sh """
+                        curl -s --head --request GET ${sonarProps.sonarUrl} | grep -q 'HTTP/1.1 200' || exit 1
+                    """
+                }
+            }
+        }
+        
+        stage('Validating Temporal Directory') {
+            steps {
+                script {
+                    echo "Validating if the temporal directory: ${SONAR_SCANNER_TEMP_DIR} is empty"
+                    validateExist("${SONAR_SCANNER_TEMP_DIR}", "sonar-scanner temporal directory doesn't exist")
+                    dir(SONAR_SCANNER_TEMP_DIR) {
+                        echo "Cleaning temporal directory"
+                        copyFiles(REPO_DIR, SONAR_SCANNER_TEMP_DIR)
+                    }
+                }
+            }
+        }
+
+        stage('Running Sonar Scanner') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        echo "Running sonar-scanner using Docker for ${sonarProps.projectName}"
+                        dir("${SONAR_SCANNER_TEMP_DIR}") {
+                            echo "Running sonar-scanner inside ${SONAR_SCANNER_TEMP_DIR}"
+
+                            sh '''
+                                export SONAR_TOKEN=${SONAR_TOKEN}
+                                docker-compose -f docker-compose.scanner.yml run --rm sonar-scanner
+                            '''
+                            
+                        }
+                    }
+                    dir("${SONAR_SCANNER_TEMP_DIR}"){
+                            sh "rm -r *"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Sonar scan completed successfully!"
+        }
+        failure {
+            echo "Sonar scan failed!"
+        }
+    }
+}

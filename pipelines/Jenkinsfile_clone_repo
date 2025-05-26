@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'PROJECT_NAME', defaultValue: 'defaultProject', description: 'Project Base Directory Repo')
+        string(name: 'REPO_URL', defaultValue: 'git@github.com:user/repo.git', description: 'SSH URL of the repository')
+        string(name: 'CLONE_DIR', defaultValue: '/var/jenkins_home/repos', description: 'Directory to clone or update the repo')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to use')
+    }
+    stages {
+        stage('Clone or Update Repository') {
+            steps {
+                script {
+                    def baseDir = "${params.CLONE_DIR}/${params.PROJECT_NAME}"
+                    echo "Cloning repository from: ${params.REPO_URL}"
+                    echo "Using branch: ${params.BRANCH}"
+                    echo "Clone directory: ${baseDir}"
+                    
+                    if(!fileExists("${params.CLONE_DIR}")){
+                        sh "mkdir ${params.CLONE_DIR}"
+                    }
+                    
+                    if(!fileExists("${baseDir}")){
+                        sh "mkdir ${baseDir}"
+                    }
+                    
+                    if (!fileExists("${baseDir}/.git")){
+                        echo "Repository isn't cloned ..."
+                        sh """
+                            git clone -b ${params.BRANCH} ${params.REPO_URL} ${baseDir}
+                            ls -ltr ${params.CLONE_DIR} && ls -ltr ${baseDir}
+                        """
+                    }else{
+                        echo "Repository already exists, updating..."
+                        sh """
+                            cd ${baseDir}
+                            git reset --hard
+                            git clean -fd
+                            git pull origin ${params.BRANCH}
+                            ls -ltr ${params.CLONE_DIR} && ls -ltr ${baseDir}
+                        """
+                    }
+                    
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "Repository successfully cloned or updated."
+        }
+        failure {
+            echo "Error occurred while cloning or updating the repository."
+        }
+    }
+}
