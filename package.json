@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "This repository contains the implementation of an automated testing plan developed using Playwright POM. The project was created as part of the automation course offered by Academia QA and adapted for use with the Your Store demo application.",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "coverage": "npx nyc --reporter=lcov --reporter=text-summary npm run test:suite",
+    "analyze": "npm run coverage",
+    "test:suite": "playwright test tests/example.spec.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/juanMBMedina/YourStore-Playwright-TestLab.git"
