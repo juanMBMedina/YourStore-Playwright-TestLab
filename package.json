@@ -1,0 +1,22 @@
+{
+  "name": "yourstore-playwright-testlab",
+  "version": "1.0.0",
+  "description": "This repository contains the implementation of an automated testing plan developed using Playwright POM. The project was created as part of the automation course offered by Academia QA and adapted for use with the Your Store demo application.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juanMBMedina/YourStore-Playwright-TestLab.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/juanMBMedina/YourStore-Playwright-TestLab/issues"
+  },
+  "homepage": "https://github.com/juanMBMedina/YourStore-Playwright-TestLab#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.21"
+  }
+}

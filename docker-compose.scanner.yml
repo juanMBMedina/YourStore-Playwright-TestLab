@@ -1,0 +1,28 @@
+services:
+  sonar-scanner:
+    container_name: sonar-scanner
+    image: sonar-scanner-js
+    restart: "no"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/Dockerfile.sonar-scanner
+    volumes:
+      - sonar_scanner_src:/usr/src
+    working_dir: /usr/src
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "cp /usr/src/sonar-scanner.properties /opt/sonar-scanner/conf/sonar-scanner.properties && sonar-scanner -Dproject.settings=/opt/sonar-scanner/conf/sonar-scanner.properties -Dsonar.login=${SONAR_TOKEN}"
+    environment:
+      - SONAR_TOKEN
+    networks:
+      - project-network
+
+networks:
+  project-network:
+    external: true
+
+volumes:
+  sonar_scanner_src:
+    name: sonar_scanner_src
+    external: true

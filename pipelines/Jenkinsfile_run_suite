@@ -1,0 +1,99 @@
+def waitForSeleniumGridUp(String url = "http://selenium-hub:4444/status", int maxRetries = 3, int waitSeconds = 5) {
+    int attempt = 0
+    while (attempt < maxRetries) {
+        try {
+            def response = sh(
+                script: "curl -s -o /dev/null -w \"%{http_code}\" ${url}",
+                returnStdout: true
+            ).trim()
+
+            if (response == "200") {
+                echo "✅ Selenium Grid is up (HTTP ${response})"
+                return true
+            } else {
+                throw new Exception("Unexpected response code: ${response}")
+            }
+        } catch (Exception e) {
+            attempt++
+            if (attempt >= maxRetries) {
+                error "❌ Selenium Grid is not available after ${maxRetries} attempts. Last response: ${e.message}"
+            } else {
+                echo "⏳ Selenium Grid not available. Retrying in ${waitSeconds} seconds... (Attempt ${attempt}/${maxRetries})"
+                sleep(time: waitSeconds, unit: 'SECONDS')
+            }
+        }
+    }
+}
+
+pipeline {
+    agent any
+
+    environment {
+        SELENIUM_GRID_HOST = "http://selenium-hub:4444/status"
+    }
+
+    parameters {
+        choice(
+            name: 'SUITE',
+            choices: ['AddToCartRunner', 'LoginRunner', 'RegisterRunner', 'AllTestRunner'],
+            description: 'Select the test suite to run'
+        )
+        choice(
+            name: 'BROWSER',
+            choices: ['Chrome', 'Edge', 'Firefox'],
+            description: 'Select the browser for test execution'
+        )
+    }
+
+    stages {
+        stage('Run Serenity Tests in Docker') {
+            steps {
+                script {
+                    def browser = params.BROWSER.toLowerCase()
+                    def suite = params.SUITE
+                    def gradleCommand = ''
+
+                    echo "Running Serenity tests for suite: ${suite} on browser: ${params.BROWSER}"
+                    gradleCommand = 'gradle :test --tests "us.opencart.runners.' + suite + '" -Denvironment=remote' + params.BROWSER + ' --info'
+                    sh """
+                        docker-compose -f docker-compose.selenium.yml up -d selenium-hub ${browser}-node
+                        gradle clean cleanTest compileTestJava --no-build-cache --refresh-dependencies
+                        rm -rf target/site
+                        rm -rf .serenity
+                    """
+                    waitForSeleniumGridUp(env.SELENIUM_GRID_HOST, 3, 10)
+                    sh """
+                        ${gradleCommand}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Tests executed successfully. Serenity report is available.'
+        }
+        failure {
+            echo 'Tests failed. Please check the execution logs and generated report.'
+        }
+        always {
+            script{
+                sh """
+                    gradle aggregate
+                    docker-compose -f docker-compose.selenium.yml down
+                """
+                echo 'Store Serenity Reports'
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: './target/site/serenity',
+                    reportFiles: 'index.html',
+                    reportName: "${params.SUITE}-Serenity-Report"
+                ])
+                echo 'Pipeline execution finished.'
+            }
+        }
+    }
+}

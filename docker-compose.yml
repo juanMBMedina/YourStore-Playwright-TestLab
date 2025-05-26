@@ -1,0 +1,85 @@
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/Dockerfile.jenkins
+    image: jenkins_project
+    container_name: jenkins
+    restart: always
+    privileged: true
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - sonar_scanner_src:/var/jenkins_home/tmp/sonar-scanner
+      - cypress_src:/var/jenkins_home/tmp/cypress
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.m2:/root/.m2
+    environment:
+      JAVA_OPTS: "-Dhudson.model.DirectoryBrowserSupport.CSP="
+    entrypoint: [ "/bin/bash", "-c", "/var/jenkins_home/setup-ssh.sh || echo 'SSH setup failed, continuing...' && /usr/bin/tini -- /usr/local/bin/jenkins.sh" ]
+    depends_on:
+      - sonarqube
+    networks:
+      - project-network
+
+  sonarqube:
+    image: sonarqube:lts
+    container_name: sonarqube
+    restart: always
+    environment:
+      # jdbc:postgresql://IP/DB
+      SONAR_JDBC_URL: jdbc:postgresql://db_sonar/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    depends_on:
+      - postgres
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - project-network
+
+  postgres:
+    image: postgres:13.7
+    container_name: db_sonar
+    restart: always
+    expose:
+      - 5432
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - project-network
+
+volumes:
+  jenkins_home:
+    name: jenkins_home
+  sonarqube_data:
+    name: sonarqube_data
+  sonarqube_logs:
+    name: sonarqube_logs
+  sonarqube_extensions:
+    name: sonarqube_extensions
+  postgres_data:
+    name: postgres_data
+  sonar_scanner_src:
+    name: sonar_scanner_src
+  cypress_src:
+    name: cypress_src
+
+networks:
+  project-network:
+    name: project-network
+    driver: bridge
+    ipam:
+      driver: default
