@@ -95,3 +95,34 @@ test.describe("YS-7: Validate error message when no data is entered in the login
     });
   }
 });
+
+test.describe("YS-8: Validate logout functionality for a user", () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    loginPage = new LoginPage(page);
+    accountPage = new AccountPage(page);
+  });
+
+  test("Should logout successfully and return to the home page", async ({ page }) => {
+    logStep("Instantiating user data");
+    const user = new UserLogin(
+      userData.loginExistUser.email,
+      userData.loginExistUser.password
+    );
+
+    await goToLogin();
+
+    logStep("3. Fill the form with correct data");
+    await loginPage.login(user);
+
+    logStep("4. Validate the user is logged in and sees the welcome message");
+    await accountPage.expectAccountUrl();
+    await accountPage.expectWelcomeMessage();
+
+    logStep("5. Perform logout from the account page");
+    await accountPage.logout();
+
+    logStep("6. Validate the user is redirected to the logout success page");
+    await homePage.expectLogoutSuccess();
+  });
+});
