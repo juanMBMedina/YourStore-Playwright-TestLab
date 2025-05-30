@@ -1,43 +1,74 @@
-import { test, expect } from '@playwright/test';
-import { HomePage } from '../src/pages/Home';
-import { LoginPage } from '../src/pages/Login';
-import { UserLogin } from '../src/models/UserLogin';
-import userData from '../resources/files/dataLoginFeature.json';
-import { AccountPage } from '../src/pages/Account';
-test.describe('YS-5: Validate login functionality for a user with correct credentials', () => {
-  test(
-    'Should login successfully with valid user credentials',
-    async ({ page }) => {
-      // Test Description: Validate login for a user with correct credentials
-      // Steps:
-      // 1. Go to the main page
-      // 2. Go to login section
-      // 3. Fill the form with correct data
-      // 4. Validate the user is logged in and sees the welcome message
-      // Traceability: Test Case ID YS-5 (from test plan)
+import { test } from "@playwright/test";
+import { HomePage } from "../src/pages/Home";
+import { LoginPage } from "../src/pages/Login";
+import { UserLogin } from "../src/models/UserLogin";
+import userData from "../resources/files/dataLoginFeature.json";
+import { AccountPage } from "../src/pages/Account";
 
-      const homePage = new HomePage(page);
-      const loginPage = new LoginPage(page);
-      const accountPage = new AccountPage(page);
-      const user = new UserLogin(
-        userData.loginExistUser.email,
-        userData.loginExistUser.password
-      );
+function logStep(step: string) {
+  console.log(`\x1b[36m[STEP]\x1b[0m ${step}`);
+}
 
-      // 1. Go to the main page
-      await homePage.goto();
-      await homePage.expectHomeUrl();
+let homePage: HomePage;
+let loginPage: LoginPage;
+let accountPage: AccountPage;
 
-      // 2. Go to login section
-      await homePage.gotoLoginPage();
-      await loginPage.expectLoginUrl();
+test.describe("YS-5: Validate login functionality for a user with correct credentials", () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    loginPage = new LoginPage(page);
+    accountPage = new AccountPage(page);
+  });
 
-      // 3. Fill the form with correct data
-      await loginPage.login(user);
+  test("Should login successfully with valid user credentials", async ({ page }) => {
+    logStep("Instantiating user data");
+    const user = new UserLogin(
+      userData.loginExistUser.email,
+      userData.loginExistUser.password
+    );
 
-      // 4. Validate the user is logged in and sees the welcome message
-      await accountPage.expectAccountUrl();
-      await accountPage.expectWelcomeMessage();
-    }
-  );
+    logStep("1. Go to the main page");
+    await homePage.goto();
+    await homePage.expectHomeUrl();
+
+    logStep("2. Go to login section");
+    await homePage.gotoLoginPage();
+    await loginPage.expectLoginUrl();
+
+    logStep("3. Fill the form with correct data");
+    await loginPage.login(user);
+
+    logStep("4. Validate the user is logged in and sees the welcome message");
+    await accountPage.expectAccountUrl();
+    await accountPage.expectWelcomeMessage();
+  });
+});
+
+test.describe("YS-6: Validate login functionality for a user with incorrect credentials", () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    loginPage = new LoginPage(page);
+  });
+
+  test("Should not login with invalid user credentials", async ({ page }) => {
+    logStep("Instantiating user data");
+    const user = new UserLogin(
+      userData.loginIncorrectUser.email,
+      userData.loginIncorrectUser.password
+    );
+
+    logStep("1. Go to the main page");
+    await homePage.goto();
+    await homePage.expectHomeUrl();
+
+    logStep("2. Go to login section");
+    await homePage.gotoLoginPage();
+    await loginPage.expectLoginUrl();
+
+    logStep("3. Fill the form with incorrect data");
+    await loginPage.login(user);
+
+    logStep("4. Validate the user is not logged in and sees the error message");
+    await loginPage.expectLoginErrorMessage();
+  });
 });

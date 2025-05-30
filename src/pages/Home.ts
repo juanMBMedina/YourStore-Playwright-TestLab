@@ -6,6 +6,7 @@ export class HomePage {
   readonly accountDropdown: Locator;
   readonly loginLink: Locator;
   readonly itemsBar: Locator;
+  readonly alertDanger: Locator;
   protected readonly page: Page;
 
   constructor(page: Page) {
@@ -14,6 +15,7 @@ export class HomePage {
     this.accountDropdown = page.locator('#top-links .dropdown a[title="My Account"]');
     this.loginLink = page.locator('ul.dropdown-menu-right a:text("Login")');
     this.itemsBar = page.locator('nav#menu');
+    this.alertDanger = page.locator('.alert-danger');
   }
 
   async goto() {
