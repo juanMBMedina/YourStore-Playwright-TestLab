@@ -7,7 +7,10 @@ export class LoginPage extends HomePage {
   readonly passwordInput: Locator;
   readonly loginButton: Locator;
   private static readonly LOGIN_URL_REGEX = /route=account\/login/;
-  private static readonly LOGIN_ERROR_MESSAGE = 'No match for E-Mail Address and/or Password';
+  private static readonly LOGIN_ERROR_MESSAGE =
+    "No match for E-Mail Address and/or Password";
+  static LOGIN_ERROR_ATTMPTS_MESSAGE =
+    "Warning: Your account has exceeded allowed number of login attempts. Please try again in 1 hour.";
 
   constructor(page) {
     super(page);
@@ -27,8 +30,20 @@ export class LoginPage extends HomePage {
   }
 
   async expectLoginErrorMessage() {
-    await this.alertDanger.waitFor({ state: 'visible' });
-    await expect(this.alertDanger).toBeVisible();
-    await expect(this.alertDanger).toContainText(LoginPage.LOGIN_ERROR_MESSAGE);
+    await this.expectErrorMessage(LoginPage.LOGIN_ERROR_MESSAGE);
   }
+
+  async expectNumMaxAttemptsErrorMessage() {
+    await this.expectErrorMessage(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE);
+  }
+
+  private async getIsVisible(text : string){
+    const locator = this.page.locator(`xpath=//*[contains(text(), '${text}')]`);
+    return locator.isVisible();
+  }
+
+  async getIsVisibleMaxAttemptsErrorMessage() {
+    return this.getIsVisible(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE);
+  } 
+
 }

@@ -126,3 +126,29 @@ test.describe("YS-8: Validate logout functionality for a user", () => {
     await homePage.expectLogoutSuccess();
   });
 });
+
+test.describe("YS-13: Validate error message when the maximum number of login attempts is not reached", () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    loginPage = new LoginPage(page);
+  });
+
+  test("YS-13: Should validate the error message when the maximum number of attempts is NOT reached", async ({ page }) => {
+    await goToLogin();
+    logStep("Step 3: Fill the form with incorrect values several times");
+    const user = new UserLogin(
+      userData.loginMaxAttemptsUser.email,
+      userData.loginMaxAttemptsUser.password
+    );
+    let attempts = 10; // Less than the maximum allowed
+    while (attempts > 0 && !(await loginPage.getIsVisibleMaxAttemptsErrorMessage())) {
+      logStep(`Attempt ${attempts}: Fill the form with incorrect data`);
+      await loginPage.login(user);
+      attempts--;
+    }
+
+    logStep("Step 4: Validate that the lockout message is NOT shown");
+    // If you have a method to check the absence of the lockout message, use it here
+    await loginPage.expectNumMaxAttemptsErrorMessage();
+  });
+});

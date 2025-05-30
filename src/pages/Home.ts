@@ -44,6 +44,14 @@ export class HomePage {
     return this.page.locator(HomePage.containsText(text));
   }
 
+  protected async expectErrorMessage(text: string) {
+    await this.alertDanger.waitFor({ state: "visible", timeout: 5000 });
+    await expect(this.alertDanger).toBeVisible();
+    if (text) {
+      await expect(this.alertDanger).toContainText(text);
+    }
+  }
+
   async expectLogoutSuccess() {
     await this.expectUrlMatch(HomePage.LOGOUT_SUCCESS_REGEX);
     await this.getContainsTextLocator(HomePage.LOGOUT_HEADER_TEXT);

@@ -7,5 +7,15 @@
   "loginIncorrectUser": {
     "email": "Royce_Stroman@gmail.com",
     "password": "worng_password"
+  },
+
+  "loginMaxAttemptsUser": {
+    "email": "email12343565@gmail.com",
+    "password": "wrongPassword"
+  },
+
+  "loginMaxAttemptsUserYS13": {
+    "email": "test_case_ys13@gmail.com",
+    "password": "incorrectPassword"
   }
 }
