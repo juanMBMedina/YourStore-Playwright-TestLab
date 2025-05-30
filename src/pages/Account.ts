@@ -11,7 +11,7 @@ export class AccountPage extends HomePage {
 	}
 
 	async expectAccountUrl() {
-		await this.page.waitForURL(AccountPage.ACCOUNT_URL_REGEX);
+		await this.expectUrlMatch(AccountPage.ACCOUNT_URL_REGEX);
 	}
 
 	async expectWelcomeMessage() {

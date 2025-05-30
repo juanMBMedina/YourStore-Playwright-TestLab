@@ -17,7 +17,7 @@ export class LoginPage extends HomePage {
   }
 
   async expectLoginUrl() {
-    await this.page.waitForURL(LoginPage.LOGIN_URL_REGEX);
+    await this.expectUrlMatch(LoginPage.LOGIN_URL_REGEX);
   }
 
   async login(user: UserLogin) {

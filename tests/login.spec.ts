@@ -13,6 +13,16 @@ let homePage: HomePage;
 let loginPage: LoginPage;
 let accountPage: AccountPage;
 
+function goToLogin() {
+  logStep("1. Go to the main page");
+  homePage.goto();
+  homePage.expectHomeUrl();
+
+  logStep("2. Go to login section");
+  homePage.gotoLoginPage();
+  loginPage.expectLoginUrl();
+}
+
 test.describe("YS-5: Validate login functionality for a user with correct credentials", () => {
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
@@ -27,13 +37,7 @@ test.describe("YS-5: Validate login functionality for a user with correct creden
       userData.loginExistUser.password
     );
 
-    logStep("1. Go to the main page");
-    await homePage.goto();
-    await homePage.expectHomeUrl();
-
-    logStep("2. Go to login section");
-    await homePage.gotoLoginPage();
-    await loginPage.expectLoginUrl();
+    await goToLogin();
 
     logStep("3. Fill the form with correct data");
     await loginPage.login(user);
@@ -57,13 +61,7 @@ test.describe("YS-6: Validate login functionality for a user with incorrect cred
       userData.loginIncorrectUser.password
     );
 
-    logStep("1. Go to the main page");
-    await homePage.goto();
-    await homePage.expectHomeUrl();
-
-    logStep("2. Go to login section");
-    await homePage.gotoLoginPage();
-    await loginPage.expectLoginUrl();
+    await goToLogin();
 
     logStep("3. Fill the form with incorrect data");
     await loginPage.login(user);
@@ -71,4 +69,29 @@ test.describe("YS-6: Validate login functionality for a user with incorrect cred
     logStep("4. Validate the user is not logged in and sees the error message");
     await loginPage.expectLoginErrorMessage();
   });
+});
+
+test.describe("YS-7: Validate error message when no data is entered in the login form", () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    loginPage = new LoginPage(page);
+  });
+
+  const scenarios = [
+    { email: "", password: "", description: "both fields empty" },
+    { email: "", password: "somePassword", description: "empty email, filled password" },
+    { email: "user@example.com", password: "", description: "filled email, empty password" }
+  ];
+
+  for (const scenario of scenarios) {
+    test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({ page }) => {
+      await goToLogin();
+
+      logStep(`3. Submit the login form with: ${scenario.description}`);
+      await loginPage.login(new UserLogin(scenario.email, scenario.password));
+
+      logStep("4. Validate the error message is shown for empty fields");
+      await loginPage.expectLoginErrorMessage();
+    });
+  }
 });

@@ -27,7 +27,11 @@ export class HomePage {
     await this.loginLink.click();
   }
 
+  async expectUrlMatch(regex: RegExp) {
+    await this.page.waitForURL(regex);
+  }
+
   async expectHomeUrl() {
-    await this.page.waitForURL(HomePage.HOME_URL_REGEX);
+    await this.expectUrlMatch(HomePage.HOME_URL_REGEX);
   }
 }
