@@ -151,3 +151,10 @@ dist
 
 # Sonarqube
 .scannerwork
+
+# VS Code
+.vscode
+
+# Allure reports
+/allure-report/
+/allure-results/
