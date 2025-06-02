@@ -1,17 +1,17 @@
 import { Locator, Page, expect } from "@playwright/test";
 
 export class HomePage {
-  public static readonly containsText = (text: String) => `xpath=//*[contains(text(), '${text}')]`;
   private static readonly HOME_URL_REGEX = /route=common\/home/;
   private static readonly LOGOUT_SUCCESS_REGEX = /route=account\/logout/;
   private static readonly LOGOUT_HEADER_TEXT = 'Account';
   private static readonly LOGOUT_MESSAGE_1 = 'You have been logged off your account. It is now safe to leave the computer.';
   private static readonly LOGOUT_MESSAGE_2 = 'Your shopping cart has been saved, the items inside it will be restored whenever you log back into your account.';
-  readonly topBar: Locator;
-  readonly accountDropdown: Locator;
-  readonly loginLink: Locator;
-  readonly itemsBar: Locator;
-  readonly alertDanger: Locator;
+  protected readonly topBar: Locator;
+  protected readonly accountDropdown: Locator;
+  protected readonly loginLink: Locator;
+  protected readonly registerLink: Locator;
+  protected readonly itemsBar: Locator;
+  protected readonly alertDanger: Locator;
   protected readonly page: Page;
 
   constructor(page: Page) {
@@ -19,6 +19,7 @@ export class HomePage {
     this.topBar = page.locator("nav#top");
     this.accountDropdown = page.locator('#top-links .dropdown a[title="My Account"]');
     this.loginLink = page.locator('ul.dropdown-menu-right a:text("Login")');
+    this.registerLink = page.locator('ul.dropdown-menu-right a:text("Register")');
     this.itemsBar = page.locator('nav#menu');
     this.alertDanger = page.locator('.alert-danger');
   }
@@ -32,6 +33,11 @@ export class HomePage {
     await this.loginLink.click();
   }
 
+  async gotoRegisterPage() {
+    await this.accountDropdown.click();
+    await this.registerLink.click();
+  }
+
   async expectUrlMatch(regex: RegExp) {
     await this.page.waitForURL(regex);
   }
@@ -40,8 +46,9 @@ export class HomePage {
     await this.expectUrlMatch(HomePage.HOME_URL_REGEX);
   }
 
-  getContainsTextLocator(text: string): Locator {
-    return this.page.locator(HomePage.containsText(text));
+  async checkTextIsVisible(text: string) {
+    await this.page.waitForSelector(`text=${text}`);
+    await expect(this.page.locator(`text=${text}`)).toBeVisible();
   }
 
   protected async expectErrorMessage(text: string) {
@@ -54,8 +61,8 @@ export class HomePage {
 
   async expectLogoutSuccess() {
     await this.expectUrlMatch(HomePage.LOGOUT_SUCCESS_REGEX);
-    await this.getContainsTextLocator(HomePage.LOGOUT_HEADER_TEXT);
-    await this.getContainsTextLocator(HomePage.LOGOUT_MESSAGE_1);
-    await this.getContainsTextLocator(HomePage.LOGOUT_MESSAGE_2);
+    await this.checkTextIsVisible(HomePage.LOGOUT_HEADER_TEXT);
+    await this.checkTextIsVisible(HomePage.LOGOUT_MESSAGE_1);
+    await this.checkTextIsVisible(HomePage.LOGOUT_MESSAGE_2);
   }
 }

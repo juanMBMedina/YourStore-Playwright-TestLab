@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/juanMBMedina/YourStore-Playwright-TestLab#readme",
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.15.21",
     "allure-playwright": "^3.2.2"
