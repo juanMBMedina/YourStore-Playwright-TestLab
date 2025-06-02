@@ -3,9 +3,17 @@ import { HomePage } from './Home';
 import { expect } from '@playwright/test';
 
 export class RegisterPage extends HomePage {
-  protected static readonly SUCCESS_REGISTRATION_HEADING = 'Account';
-  protected static readonly SUCCESS_REGISTRATION_MESSAGE = 'Congratulations! Your new account has been successfully created!';
-  protected static readonly USER_EXISTS_REGISTRATION_MESSAGE = ' Warning: E-Mail Address is already registered!';
+  private static readonly SUCCESS_REGISTRATION_HEADING = 'Account';
+  private static readonly SUCCESS_REGISTRATION_MESSAGE = 'Congratulations! Your new account has been successfully created!';
+  private static readonly USER_EXISTS_REGISTRATION_MESSAGE = ' Warning: E-Mail Address is already registered!';
+  private static readonly FIRST_NAME_VOID_MESSAGE = 'First Name must be between 1 and 32 characters!';
+  private static readonly LAST_NAME_VOID_MESSAGE = 'Last Name must be between 1 and 32 characters!';
+  private static readonly EMAIL_VOID_MESSAGE = 'E-Mail Address does not appear to be valid!';
+  private static readonly TELEPHONE_VOID_MESSAGE = 'Telephone must be between 3 and 32 characters!';
+  private static readonly PASSWORD_VOID_MESSAGE = 'Password must be between 4 and 20 characters!';
+  private static readonly CONFIRM_PASSWORD_NO_MATCH_MESSAGE = 'Password confirmation does not match password!';
+  private static readonly PRIVACY_POLICY_MESSAGE = 'Warning: You must agree to the Privacy Policy!';
+
   // Locators
   protected readonly firstNameInput = 'input[name="firstname"]';
   protected readonly lastNameInput = 'input[name="lastname"]';
@@ -23,9 +31,9 @@ export class RegisterPage extends HomePage {
     await this.page.fill(this.firstNameInput, user.getFirstName());
     await this.page.fill(this.lastNameInput, user.getLastName());
     await this.page.fill(this.emailInput, user.getEmail());
-    await this.page.fill(this.telephoneInput, user.getEmail());
+    await this.page.fill(this.telephoneInput, user.getTelephone());
     await this.page.fill(this.passwordInput, user.getPassword());
-    await this.page.fill(this.confirmPasswordInput, user.getPassword());
+    await this.page.fill(this.confirmPasswordInput, user.getConfirmPassword());
     await this.selectSubscribeOption(user.getSubscribe());
     await this.selectPrivacyStatus(user.getCheckPrivacy());
   }
@@ -50,6 +58,23 @@ export class RegisterPage extends HomePage {
 
   async expectUserExistsRegistration() {
     await this.expectErrorMessage(RegisterPage.USER_EXISTS_REGISTRATION_MESSAGE);
+  }
+
+  async expectErrorMessages(messages: string[]) {
+    for (const message of messages) {
+      await expect(this.page.locator(`text=${message}`)).toBeVisible();
+    }
+  }
+
+  static getErrorMessages() {
+    return {
+      firstNameVoid: RegisterPage.FIRST_NAME_VOID_MESSAGE,
+      lastNameVoid: RegisterPage.LAST_NAME_VOID_MESSAGE,
+      emailVoid: RegisterPage.EMAIL_VOID_MESSAGE,
+      telephoneVoid: RegisterPage.TELEPHONE_VOID_MESSAGE,
+      passwordVoid: RegisterPage.PASSWORD_VOID_MESSAGE,
+      confirmPasswordNoMatch: RegisterPage.CONFIRM_PASSWORD_NO_MATCH_MESSAGE,
+    };
   }
 
   async selectPrivacyStatus(status: boolean) {

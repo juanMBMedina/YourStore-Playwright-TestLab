@@ -6,6 +6,7 @@ interface UserRegisterData {
   email?: string;
   telephone?: string;
   password?: string;
+  confirmPassword?: string;
   checkPrivacy?: boolean;
   subscribe?: boolean;
 }
@@ -16,17 +17,20 @@ export class UserRegister {
   private email: string;
   private telephone: string;
   private password: string;
+  private confirmPassword: string;
   private checkPrivacy: boolean;
   private subscribe: boolean;
+  
 
   constructor(data?: UserRegisterData) {
-    this.firstName = data?.firstName || faker.name.firstName();
-    this.lastName = data?.lastName || faker.name.lastName();
-    this.email = data?.email || faker.internet.email();
-    this.telephone = data?.telephone || faker.phone.number().replace(/\D/g, '');
-    this.password = data?.password || faker.internet.password();
-    this.checkPrivacy = data?.checkPrivacy ?? true;
-    this.subscribe = data?.subscribe ?? faker.datatype.boolean();
+    this.firstName = data?.firstName !== undefined ? data.firstName : faker.name.firstName();
+    this.lastName = data?.lastName !== undefined ? data.lastName : faker.name.lastName();
+    this.email = data?.email !== undefined ? data.email : faker.internet.email();
+    this.telephone = data?.telephone !== undefined ? data.telephone : faker.phone.number().replace(/\D/g, '');
+    this.password = data?.password !== undefined ? data.password : faker.internet.password();
+    this.confirmPassword = data?.confirmPassword !== undefined ? data.confirmPassword : this.password;
+    this.checkPrivacy = data?.checkPrivacy !== undefined ? data.checkPrivacy : true;
+    this.subscribe = data?.subscribe !== undefined ? data.subscribe : faker.datatype.boolean();
   }
 
   getFirstName(): string {
@@ -55,6 +59,10 @@ export class UserRegister {
 
   getSubscribe(): boolean {
     return this.subscribe;
+  }
+
+  getConfirmPassword(): string {
+    return this.confirmPassword;
   }
 
   toJSON() {

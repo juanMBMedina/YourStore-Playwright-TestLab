@@ -59,3 +59,26 @@ test.describe('YS-2: Validate error message when registering an existing user', 
     await registerPage.expectUserExistsRegistration();
   });
 });
+
+test.describe('YS-3: Validate error messages for void or invalid fields during registration', () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    registerPage = new RegisterPage(page);
+  });
+
+  const scenarios = data.scenarios;
+
+  for (const scenario of scenarios) {
+    test(scenario.description, async ({ page }) => {
+      // Go to Register page.
+      goToRegister();
+
+      logStep(`3. Attempt to register with scenario: ${scenario.description}`);
+      const user = new UserRegister(scenario.userData);
+      await registerPage.register(user);
+      
+      logStep('4. Validate error messages are displayed for the scenario');
+      await registerPage.expectErrorMessages(scenario.expectedErrors);
+    });
+  }
+});
