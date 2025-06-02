@@ -1,0 +1,11 @@
+{
+  "userExist": {
+    "firstName": "Mitchel",
+    "lastName": "Kihn-Kuhic",
+    "email": "Maritza.Reilly@hotmail.com",
+    "telephone": "99729724380263",
+    "password": "wrong_password",
+    "checkPrivacy": true,
+    "subscribe": true
+  }  
+}

@@ -30,12 +30,11 @@ test.describe("YS-5: Validate login functionality for a user with correct creden
     accountPage = new AccountPage(page);
   });
 
-  test("Should login successfully with valid user credentials", async ({ page }) => {
+  test("Should login successfully with valid user credentials", async ({
+    page,
+  }) => {
     logStep("Instantiating user data");
-    const user = new UserLogin(
-      userData.loginExistUser.email,
-      userData.loginExistUser.password
-    );
+    const user = new UserLogin(userData.loginExistUser);
 
     await goToLogin();
 
@@ -56,10 +55,7 @@ test.describe("YS-6: Validate login functionality for a user with incorrect cred
 
   test("Should not login with invalid user credentials", async ({ page }) => {
     logStep("Instantiating user data");
-    const user = new UserLogin(
-      userData.loginIncorrectUser.email,
-      userData.loginIncorrectUser.password
-    );
+    const user = new UserLogin(userData.loginIncorrectUser);
 
     await goToLogin();
 
@@ -79,12 +75,22 @@ test.describe("YS-7: Validate error message when no data is entered in the login
 
   const scenarios = [
     { email: "", password: "", description: "both fields empty" },
-    { email: "", password: "somePassword", description: "empty email, filled password" },
-    { email: "user@example.com", password: "", description: "filled email, empty password" }
+    {
+      email: "",
+      password: "somePassword",
+      description: "empty email, filled password",
+    },
+    {
+      email: "user@example.com",
+      password: "",
+      description: "filled email, empty password",
+    },
   ];
 
   for (const scenario of scenarios) {
-    test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({ page }) => {
+    test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({
+      page,
+    }) => {
       await goToLogin();
 
       logStep(`3. Submit the login form with: ${scenario.description}`);
@@ -103,12 +109,12 @@ test.describe("YS-8: Validate logout functionality for a user", () => {
     accountPage = new AccountPage(page);
   });
 
-  test("Should logout successfully and return to the home page", async ({ page }) => {
+  test("Should logout successfully and return to the home page", async ({
+    page,
+  }) => {
     logStep("Instantiating user data");
-    const user = new UserLogin(
-      userData.loginExistUser.email,
-      userData.loginExistUser.password
-    );
+
+    const user = new UserLogin(userData.loginExistUser);
 
     await goToLogin();
 
@@ -133,19 +139,19 @@ test.describe("YS-13: Validate error message when the maximum number of login at
     loginPage = new LoginPage(page);
   });
 
-  test("YS-13: Should validate the error message when the maximum number of attempts is NOT reached", async ({ page }) => {
+  test("YS-13: Should validate the error message when the maximum number of attempts is NOT reached", async ({
+    page,
+  }) => {
     await goToLogin();
     logStep("Step 3: Fill the form with incorrect values several times");
-    const user = new UserLogin(
-      userData.loginMaxAttemptsUser.email,
-      userData.loginMaxAttemptsUser.password
-    );
-    let attempts = 10; // Less than the maximum allowed
-    while (attempts > 0 && !(await loginPage.getIsVisibleMaxAttemptsErrorMessage())) {
-      logStep(`Attempt ${attempts}: Fill the form with incorrect data`);
+    const user = new UserLogin(userData.loginMaxAttemptsUser);
+    let maxAttempts = 10;
+    let attempt = 1;
+    do {
+      logStep(`Attempt ${attempt}: Fill the form with incorrect data`);
       await loginPage.login(user);
-      attempts--;
-    }
+      attempt++;
+    } while (attempt <= maxAttempts && !(await loginPage.isVisibleMaxAttempsMssg()));
 
     logStep("Step 4: Validate that the lockout message is NOT shown");
     // If you have a method to check the absence of the lockout message, use it here

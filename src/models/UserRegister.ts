@@ -1,22 +1,32 @@
 import { faker } from '@faker-js/faker';
 
-export class UserRegister {
-  private readonly firstName: string;
-  private readonly lastName: string;
-  private readonly email: string;
-  private readonly telephone: string;
-  private readonly password: string;
-  private readonly checkPrivacy: boolean = true;
-  private readonly subscribe: boolean;
+interface UserRegisterData {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  telephone?: string;
+  password?: string;
+  checkPrivacy?: boolean;
+  subscribe?: boolean;
+}
 
-  constructor() {
-    this.firstName = faker.name.firstName();
-    this.lastName = faker.name.lastName();
-    this.email = faker.internet.email();
-    this.telephone = faker.phone.number().replace(/\D/g, '');
-    this.password = faker.internet.password();
-    this.checkPrivacy = true;
-    this.subscribe = faker.datatype.boolean();
+export class UserRegister {
+  private firstName: string;
+  private lastName: string;
+  private email: string;
+  private telephone: string;
+  private password: string;
+  private checkPrivacy: boolean;
+  private subscribe: boolean;
+
+  constructor(data?: UserRegisterData) {
+    this.firstName = data?.firstName || faker.name.firstName();
+    this.lastName = data?.lastName || faker.name.lastName();
+    this.email = data?.email || faker.internet.email();
+    this.telephone = data?.telephone || faker.phone.number().replace(/\D/g, '');
+    this.password = data?.password || faker.internet.password();
+    this.checkPrivacy = data?.checkPrivacy ?? true;
+    this.subscribe = data?.subscribe ?? faker.datatype.boolean();
   }
 
   getFirstName(): string {
@@ -54,8 +64,8 @@ export class UserRegister {
       email: this.email,
       telephone: this.telephone,
       password: this.password,
-      checkPrivacy: this.checkPrivacy,
       subscribe: this.subscribe,
+      checkPrivacy: this.checkPrivacy,
     };
   }
 }

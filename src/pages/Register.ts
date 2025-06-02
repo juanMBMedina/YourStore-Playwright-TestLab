@@ -5,6 +5,7 @@ import { expect } from '@playwright/test';
 export class RegisterPage extends HomePage {
   protected static readonly SUCCESS_REGISTRATION_HEADING = 'Account';
   protected static readonly SUCCESS_REGISTRATION_MESSAGE = 'Congratulations! Your new account has been successfully created!';
+  protected static readonly USER_EXISTS_REGISTRATION_MESSAGE = ' Warning: E-Mail Address is already registered!';
   // Locators
   protected readonly firstNameInput = 'input[name="firstname"]';
   protected readonly lastNameInput = 'input[name="lastname"]';
@@ -16,9 +17,7 @@ export class RegisterPage extends HomePage {
   protected readonly continueButton = 'input[type="submit"]';
   protected readonly subscribeYesRadio = 'input[name="newsletter"][value="1"]';
   protected readonly subscribeNoRadio = 'input[name="newsletter"][value="0"]';
-  protected readonly successMessageLocator = '#content h1';
-  protected readonly successMessageTextLocator = '#content p:first-of-type';
-
+  
   // Methods to interact with the form
   async fillRegistrationForm(user: UserRegister) {
     await this.page.fill(this.firstNameInput, user.getFirstName());
@@ -35,6 +34,11 @@ export class RegisterPage extends HomePage {
     await this.page.click(this.continueButton);
   }
 
+  async register(user: UserRegister) {
+    await this.fillRegistrationForm(user);
+    await this.submitForm();
+  }
+
   async expectRegisterUrl() {
     await this.page.waitForURL(/route=account\/register/);
   }
@@ -42,6 +46,10 @@ export class RegisterPage extends HomePage {
   async expectSuccessRegistration() {
     await expect(this.page.locator(this.successMessageLocator)).toHaveText(RegisterPage.SUCCESS_REGISTRATION_HEADING);
     await expect(this.page.locator(this.successMessageTextLocator)).toContainText(RegisterPage.SUCCESS_REGISTRATION_MESSAGE);
+  }
+
+  async expectUserExistsRegistration() {
+    await this.expectErrorMessage(RegisterPage.USER_EXISTS_REGISTRATION_MESSAGE);
   }
 
   async selectPrivacyStatus(status: boolean) {

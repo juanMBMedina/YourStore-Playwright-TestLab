@@ -37,13 +37,7 @@ export class LoginPage extends HomePage {
     await this.expectErrorMessage(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE);
   }
 
-  private async getIsVisible(text : string){
-    const locator = this.page.locator(`xpath=//*[contains(text(), '${text}')]`);
-    return locator.isVisible();
+  async isVisibleMaxAttempsMssg() {
+    return this.alertDanger.getByText(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE).isVisible();
   }
-
-  async getIsVisibleMaxAttemptsErrorMessage() {
-    return this.getIsVisible(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE);
-  } 
-
 }

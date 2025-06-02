@@ -13,6 +13,8 @@ export class HomePage {
   protected readonly itemsBar: Locator;
   protected readonly alertDanger: Locator;
   protected readonly page: Page;
+  protected readonly successMessageLocator = '#content h1';
+  protected readonly successMessageTextLocator = '#content p:first-of-type';
 
   constructor(page: Page) {
     this.page = page;
@@ -21,7 +23,7 @@ export class HomePage {
     this.loginLink = page.locator('ul.dropdown-menu-right a:text("Login")');
     this.registerLink = page.locator('ul.dropdown-menu-right a:text("Register")');
     this.itemsBar = page.locator('nav#menu');
-    this.alertDanger = page.locator('.alert-danger');
+    this.alertDanger = page.locator('.alert.alert-danger.alert-dismissible');
   }
 
   async goto() {
@@ -47,6 +49,7 @@ export class HomePage {
   }
 
   async checkTextIsVisible(text: string) {
+    // Use only unique text to avoid conflicts with other elements
     await this.page.waitForSelector(`text=${text}`);
     await expect(this.page.locator(`text=${text}`)).toBeVisible();
   }
@@ -61,7 +64,7 @@ export class HomePage {
 
   async expectLogoutSuccess() {
     await this.expectUrlMatch(HomePage.LOGOUT_SUCCESS_REGEX);
-    await this.checkTextIsVisible(HomePage.LOGOUT_HEADER_TEXT);
+    await expect(this.page.locator(this.successMessageLocator)).toHaveText(HomePage.LOGOUT_HEADER_TEXT);
     await this.checkTextIsVisible(HomePage.LOGOUT_MESSAGE_1);
     await this.checkTextIsVisible(HomePage.LOGOUT_MESSAGE_2);
   }
