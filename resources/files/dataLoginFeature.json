@@ -12,5 +12,19 @@
   "loginMaxAttemptsUser": {
     "email": "email12343565@gmail.com",
     "password": "wrongPassword"
-  }
+  },
+
+  "scenarios": [
+    { "email": "", "password": "", "description": "both fields empty" },
+    {
+      "email": "",
+      "password": "somePassword",
+      "description": "empty email, filled password"
+    },
+    {
+      "email": "user@example.com",
+      "password": "",
+      "description": "filled email, empty password"
+    }
+  ]
 }
