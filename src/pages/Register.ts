@@ -77,6 +77,10 @@ export class RegisterPage extends HomePage {
     };
   }
 
+  async expectUserWithoutPrivacy() {
+    await this.expectErrorMessage(RegisterPage.PRIVACY_POLICY_MESSAGE);
+  }
+
   async selectPrivacyStatus(status: boolean) {
     if (status) {
       await this.page.check(this.agreeCheckbox);

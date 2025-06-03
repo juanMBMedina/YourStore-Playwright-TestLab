@@ -82,3 +82,22 @@ test.describe('YS-3: Validate error messages for void or invalid fields during r
     });
   }
 });
+
+test.describe('YS-4: Validate error message when registering without agreeing to Privacy Policy', () => {
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    registerPage = new RegisterPage(page);
+  });
+
+  test('Show error message for registration without agreeing to Privacy Policy', async ({ page }) => {
+    // Go to Register page.
+    goToRegister();
+
+    logStep('3. Fill out the registration form without agreeing to Privacy Policy');
+    const user = new UserRegister(data.userWithoutPrivacy);
+    await registerPage.register(user);
+
+    logStep('4. Validate that the user was not registered and an error message is displayed');
+    await registerPage.expectUserWithoutPrivacy();
+  });
+});

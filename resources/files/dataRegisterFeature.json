@@ -9,6 +9,17 @@
     "subscribe": true
   },
 
+  "userWithoutPrivacy": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "yoursite@test1.com",
+    "telephone": "123456789",
+    "password": "password123",
+    "confirmPassword": "password123",
+    "subscribe": false,
+    "checkPrivacy": false
+  },
+
   "scenarios": [
     {
       "description": "First Name is void",
