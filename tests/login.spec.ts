@@ -10,122 +10,100 @@ let homePage: HomePage;
 let loginPage: LoginPage;
 let accountPage: AccountPage;
 
-test.describe("YS-5: Validate login functionality for a user with correct credentials", () => {
+test.describe("Your Site Web Page: Login Feature", () => {
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
     accountPage = new AccountPage(page);
-    await goToLogin(homePage, loginPage);
   });
 
-  test("Should login successfully with valid user credentials", async ({
-    page,
-  }) => {
-    logStep("Instantiating user data");
-    const user = new UserLogin(userData.loginExistUser);
+  test.describe("YS-5: Valid login", () => {
+    test("Should login successfully with valid user credentials", async ({ page }) => {
+      await goToLogin(homePage, loginPage);
 
-    logStep("3. Fill the form with correct data");
-    await loginPage.login(user);
+      logStep("Instantiating valid user data");
+      const user = new UserLogin(userData.loginExistUser);
 
-    logStep("4. Validate the user is logged in and sees the welcome message");
-    await accountPage.expectAccountUrl();
-    await accountPage.expectWelcomeMessage();
-  });
-});
+      logStep("Filling the form with correct data");
+      await loginPage.login(user);
 
-test.describe("YS-6: Validate login functionality for a user with incorrect credentials", () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    loginPage = new LoginPage(page);
-    await goToLogin(homePage, loginPage);
+      logStep("Validating the user is logged in and sees the welcome message");
+      await accountPage.expectAccountUrl();
+      await accountPage.expectWelcomeMessage();
+    });
   });
 
-  test("Should not login with invalid user credentials", async ({ page }) => {
-    logStep("Instantiating user data");
-    const user = new UserLogin(userData.loginIncorrectUser);
+  test.describe("YS-6: Invalid login", () => {
+    test("Should not login with invalid user credentials", async ({ page }) => {
+      await goToLogin(homePage, loginPage);
 
-    logStep("3. Fill the form with incorrect data");
-    await loginPage.login(user);
+      logStep("Instantiating invalid user data");
+      const user = new UserLogin(userData.loginIncorrectUser);
 
-    logStep("4. Validate the user is not logged in and sees the error message");
-    await loginPage.expectLoginErrorMessage();
-  });
-});
+      logStep("Filling the form with incorrect data");
+      await loginPage.login(user);
 
-test.describe("YS-7: Validate error message when no data is entered in the login form", () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    loginPage = new LoginPage(page);
-    await goToLogin(homePage, loginPage);
-  });
-
-  for (const scenario of userData.scenarios) {
-    test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({
-      page,
-    }) => {
-      logStep(`3. Submit the login form with: ${scenario.description}`);
-      await loginPage.login(new UserLogin(scenario.email, scenario.password));
-
-      logStep("4. Validate the error message is shown for empty fields");
+      logStep("Validating the error message is displayed");
       await loginPage.expectLoginErrorMessage();
     });
-  }
-});
-
-test.describe("YS-8: Validate logout functionality for a user", () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    loginPage = new LoginPage(page);
-    accountPage = new AccountPage(page);
-    await goToLogin(homePage, loginPage);
   });
 
-  test("Should logout successfully and return to the home page", async ({
-    page,
-  }) => {
-    logStep("Instantiating user data");
-    const user = new UserLogin(userData.loginExistUser);
+  test.describe("YS-7: Empty fields in login form", () => {
+    for (const scenario of userData.scenarios) {
+      test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({ page }) => {
+        await goToLogin(homePage, loginPage);
 
-    logStep("3. Fill the form with correct data");
-    await loginPage.login(user);
+        logStep(`Submitting the login form with: ${scenario.description}`);
+        await loginPage.login(new UserLogin(scenario.email, scenario.password));
 
-    logStep("4. Validate the user is logged in and sees the welcome message");
-    await accountPage.expectAccountUrl();
-    await accountPage.expectWelcomeMessage();
-
-    logStep("5. Perform logout from the account page");
-    await accountPage.logout();
-
-    logStep("6. Validate the user is redirected to the logout success page");
-    await homePage.expectLogoutSuccess();
-  });
-});
-
-test.describe("YS-13: Validate error message when the maximum number of login attempts is not reached", () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    loginPage = new LoginPage(page);
-    await goToLogin(homePage, loginPage);
+        logStep("Validating the error message is shown for empty fields");
+        await loginPage.expectLoginErrorMessage();
+      });
+    }
   });
 
-  test("YS-13: Should validate the error message when the maximum number of attempts is NOT reached", async ({
-    page,
-  }) => {
-    logStep("Step 3: Fill the form with incorrect values several times");
-    const user = new UserLogin(userData.loginMaxAttemptsUser);
-    let maxAttempts = 10;
-    let attempt = 1;
-    do {
-      logStep(`Attempt ${attempt}: Fill the form with incorrect data`);
+  test.describe("YS-8: Logout functionality", () => {
+    test("Should logout successfully and return to the home page", async ({ page }) => {
+      await goToLogin(homePage, loginPage);
+
+      logStep("Instantiating valid user data");
+      const user = new UserLogin(userData.loginExistUser);
+
+      logStep("Filling the form with correct data");
       await loginPage.login(user);
-      attempt++;
-    } while (
-      attempt <= maxAttempts &&
-      !(await loginPage.isVisibleMaxAttempsMssg())
-    );
 
-    logStep("Step 4: Validate that the lockout message is NOT shown");
-    // If you have a method to check the absence of the lockout message, use it here
-    await loginPage.expectNumMaxAttemptsErrorMessage();
+      logStep("Validating login success");
+      await accountPage.expectAccountUrl();
+      await accountPage.expectWelcomeMessage();
+
+      logStep("Performing logout");
+      await accountPage.logout();
+
+      logStep("Validating redirection to logout success page");
+      await homePage.expectLogoutSuccess();
+    });
+  });
+
+  test.describe("YS-13: Max login attempts not reached", () => {
+    test("Should validate that lockout message is NOT shown before reaching max attempts", async ({ page }) => {
+      await goToLogin(homePage, loginPage);
+
+      logStep("Filling the form with incorrect values several times");
+      const user = new UserLogin(userData.loginMaxAttemptsUser);
+      const maxAttempts = 10;
+      let attempt = 1;
+
+      do {
+        logStep(`Attempt ${attempt}: Incorrect login`);
+        await loginPage.login(user);
+        attempt++;
+      } while (
+        attempt <= maxAttempts &&
+        !(await loginPage.isVisibleMaxAttempsMssg())
+      );
+
+      logStep("Validating the lockout message is NOT shown");
+      await loginPage.expectNumMaxAttemptsErrorMessage();
+    });
   });
 });

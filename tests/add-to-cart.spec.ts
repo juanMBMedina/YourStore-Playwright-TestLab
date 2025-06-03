@@ -6,33 +6,35 @@ import { UserLogin } from '../src/models/UserLogin';
 import { AccountPage } from '../src/pages/Account';
 import userData from "../resources/files/dataLoginFeature.json";
 
-
 let homePage: HomePage;
 let loginPage: LoginPage;
 let accountPage: AccountPage;
 
-test.describe('Add to cart Suit case to Your Site Web Site', () => {
+test.describe('Your Site Web Page: Add to Cart Feature', () => {
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
     accountPage = new AccountPage(page);
 
-    goToLogin(homePage, loginPage);
-    logStep("3. Perform login with user credentials");
+    await goToLogin(homePage, loginPage);
+
+    logStep("Log in with valid user credentials");
     await loginPage.expectLoginUrl();
     await loginPage.login(new UserLogin(userData.loginExistUser));
     await accountPage.expectAccountUrl(); 
-
   });
 
-  test('YS-9 Validate the correct display of the product comparison message', async ({ page }) => {
-    const productName : string = 'iMac';
-    logStep(`4. Searching for the product ${productName} in the search bar`);
+  test('YS-9: Should show a confirmation message when adding a product to comparison', async ({ page }) => {
+    const productName: string = 'iMac';
+
+    logStep(`Search and navigate to category containing ${productName}`);
     await homePage.selectNavbarCategory('Desktops', 'Mac');
-    // Validate the page title
     await homePage.validateCategory();
-    logStep(`5. Adding the product ${productName} to the comparison list`);
+
+    logStep(`Add ${productName} to comparison list`);
     await homePage.compareProduct(productName);
+
+    logStep(`Validate comparison success message for ${productName}`);
     await homePage.validateComparisonSuccess(productName);
   });
 });

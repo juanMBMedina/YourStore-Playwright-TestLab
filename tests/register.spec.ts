@@ -8,81 +8,63 @@ import { goToRegister, logStep } from '../src/utils/auth-utils';
 let homePage: HomePage;
 let registerPage: RegisterPage;
 
-test.describe('YS-1: Validate correct functionality when registering a new user', () => {
+test.describe('Your Site Web Page: Register User Feature', () => {
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     registerPage = new RegisterPage(page);
   });
 
-  test('Successfully register a new user', async ({ page }) => {
-    // Go to Register page.
-    goToRegister(homePage, registerPage);
+  test.describe('YS-1: Register with valid data', () => {
+    test('Should successfully register a new user', async ({ page }) => {
+      await goToRegister(homePage, registerPage);
 
-    logStep('3. Fill out the registration form with valid data');
-    const user = new UserRegister();
-    await registerPage.register(user);
-
-    logStep('4. Validate that the user was successfully registered');
-    await registerPage.expectSuccessRegistration();
-  });
-});
-
-test.describe('YS-2: Validate error message when registering an existing user', () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    registerPage = new RegisterPage(page);
-  });
-
-  test('Show error message for existing user registration', async ({ page }) => {
-    // Go to Register page.
-    goToRegister(homePage, registerPage);
-
-    logStep('3. Fill out the registration form with an existing user');
-    const user = new UserRegister(data.userExist);
-    await registerPage.register(user);
-    logStep('4. Validate that the user was not registered and an error message is displayed');
-    await registerPage.expectUserExistsRegistration();
-  });
-});
-
-test.describe('YS-3: Validate error messages for void or invalid fields during registration', () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    registerPage = new RegisterPage(page);
-  });
-
-  const scenarios = data.scenarios;
-
-  for (const scenario of scenarios) {
-    test(scenario.description, async ({ page }) => {
-      // Go to Register page.
-      goToRegister(homePage, registerPage);
-
-      logStep(`3. Attempt to register with scenario: ${scenario.description}`);
-      const user = new UserRegister(scenario.userData);
+      logStep('Fill out the registration form with valid data');
+      const user = new UserRegister(); // genera usuario válido por defecto
       await registerPage.register(user);
-      
-      logStep('4. Validate error messages are displayed for the scenario');
-      await registerPage.expectErrorMessages(scenario.expectedErrors);
-    });
-  }
-});
 
-test.describe('YS-4: Validate error message when registering without agreeing to Privacy Policy', () => {
-  test.beforeEach(async ({ page }) => {
-    homePage = new HomePage(page);
-    registerPage = new RegisterPage(page);
+      logStep('Validate successful registration');
+      await registerPage.expectSuccessRegistration();
+    });
   });
 
-  test('Show error message for registration without agreeing to Privacy Policy', async ({ page }) => {
-    // Go to Register page.
-    goToRegister(homePage, registerPage);
+  test.describe('YS-2: Register with existing user', () => {
+    test('Should show error message when user already exists', async ({ page }) => {
+      await goToRegister(homePage, registerPage);
 
-    logStep('3. Fill out the registration form without agreeing to Privacy Policy');
-    const user = new UserRegister(data.userWithoutPrivacy);
-    await registerPage.register(user);
+      logStep('Fill out the registration form with an existing user');
+      const user = new UserRegister(data.userExist);
+      await registerPage.register(user);
 
-    logStep('4. Validate that the user was not registered and an error message is displayed');
-    await registerPage.expectUserWithoutPrivacy();
+      logStep('Validate error message for existing user');
+      await registerPage.expectUserExistsRegistration();
+    });
+  });
+
+  test.describe('YS-3: Register with empty or invalid fields', () => {
+    for (const scenario of data.scenarios) {
+      test(`${scenario.description}`, async ({ page }) => {
+        await goToRegister(homePage, registerPage);
+
+        logStep(`Attempting to register with: ${scenario.description}`);
+        const user = new UserRegister(scenario.userData);
+        await registerPage.register(user);
+
+        logStep('Validate error messages for invalid input');
+        await registerPage.expectErrorMessages(scenario.expectedErrors);
+      });
+    }
+  });
+
+  test.describe('YS-4: Register without agreeing to Privacy Policy', () => {
+    test('Should show error when privacy policy is not accepted', async ({ page }) => {
+      await goToRegister(homePage, registerPage);
+
+      logStep('Attempting to register without agreeing to privacy policy');
+      const user = new UserRegister(data.userWithoutPrivacy);
+      await registerPage.register(user);
+
+      logStep('Validate error message for missing privacy policy agreement');
+      await registerPage.expectUserWithoutPrivacy();
+    });
   });
 });

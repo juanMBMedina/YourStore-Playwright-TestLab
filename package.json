@@ -7,7 +7,8 @@
     "coverage": "npx nyc --reporter=lcov --reporter=text-summary npm run test:suite",
     "analyze": "npm run coverage",
     "test:login-suite": "playwright test tests/login.spec.ts",
-    "test:register-suite": "playwright test tests/register.spec.ts"
+    "test:register-suite": "playwright test tests/register.spec.ts",
+    "test:add-to-cart-suite": "playwright test tests/add-to-cart.spec.ts"
   },
   "repository": {
     "type": "git",
