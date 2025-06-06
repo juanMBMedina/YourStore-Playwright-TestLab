@@ -80,7 +80,7 @@ test.describe("Your Site Web Page: Login Feature", () => {
       await accountPage.logout();
 
       logStep("Validating redirection to logout success page");
-      await homePage.expectLogoutSuccess();
+      await accountPage.expectLogoutSuccess();
     });
   });
 

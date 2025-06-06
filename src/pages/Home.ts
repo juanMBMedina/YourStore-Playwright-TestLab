@@ -1,15 +1,13 @@
 import { Locator, Page, expect } from "@playwright/test";
 import { ItemsTable } from "../components/ItemsTable";
+import { ItemBox } from "../components/ItemBox";
+import { NavBarCategory } from "../components/NavBarCategory";
+import { TopBar } from "../components/TopBar";
+import { AlertDanger } from "../components/AlertDanger";
+import { AlertSuccess } from "../components/AlertSuccess";
 
 export class HomePage {
   private static readonly HOME_URL_REGEX = /route=common\/home/;
-  private static readonly LOGOUT_SUCCESS_REGEX = /route=account\/logout/;
-  private static readonly CATEGORY_URL_REGEX = /route=product\/category&path/;
-  private static readonly LOGOUT_HEADER_TEXT = "Account";
-  private static readonly LOGOUT_MESSAGE_1 =
-    "You have been logged off your account. It is now safe to leave the computer.";
-  private static readonly LOGOUT_MESSAGE_2 =
-    "Your shopping cart has been saved, the items inside it will be restored whenever you log back into your account.";
   private static readonly ADD_TO_CART_SUCCESS_MESSAGE = (productName: string) =>
     `Success: You have added ${productName} to your shopping cart!`;
   private static readonly ADD_TO_WISHLIST_LOGIN_REQUIRED_MESSAGE = (
@@ -19,57 +17,61 @@ export class HomePage {
   private static readonly ADD_TO_COMPARISON_SUCCESS_MESSAGE = (
     productName: string
   ) => `Success: You have added ${productName} to your product comparison!`;
-  protected readonly shoppingCartLink: Locator;
-  protected readonly topBar: Locator;
-  protected readonly accountDropdown: Locator;
-  protected readonly loginLink: Locator;
-  protected readonly registerLink: Locator;
-  protected readonly itemsBar: Locator;
-  protected readonly alertDanger: Locator;
-  protected readonly page: Page;
   protected readonly successMessageLocator = "#content h1";
   protected readonly successMessageTextLocator = "#content p:first-of-type";
   protected readonly successAlert: Locator;
   private readonly itemsTable: ItemsTable;
+  private readonly itemBox: ItemBox;
+  private readonly navBarCategory: NavBarCategory;
+  protected readonly topBarComponent: TopBar;
+  protected readonly alertDangerComponent: AlertDanger;
+  protected readonly successAlertComponent: AlertSuccess;
+  protected readonly page: Page;
 
   constructor(page: Page) {
     this.page = page;
-    this.topBar = page.locator("nav#top");
-    this.accountDropdown = page.locator(
-      '#top-links .dropdown a[title="My Account"]'
-    );
-    this.loginLink = this.topBar.locator(
-      'ul.dropdown-menu-right a:text("Login")'
-    );
-    this.registerLink = page.locator(
-      'ul.dropdown-menu-right a:text("Register")'
-    );
-    this.shoppingCartLink = this.topBar.locator("li a[title='Shopping Cart']");
-
-    this.alertDanger = page.locator(".alert.alert-danger.alert-dismissible");
-    this.itemsBar = page.locator("nav#menu");
-    this.successAlert = page.locator(".alert.alert-success.alert-dismissible");
+    this.alertDangerComponent = new AlertDanger(page);
     this.itemsTable = new ItemsTable(page);
+    this.itemBox = new ItemBox(page);
+    this.navBarCategory = new NavBarCategory(page);
+    this.topBarComponent = new TopBar(page);
+    this.successAlertComponent = new AlertSuccess(page);
   }
 
   async goto() {
     await this.page.goto(
-      "https://opencart.abstracta.us/index.php?route=common/home"
+      "https://opencart.abstracta.us/index.php?route=common/home",
+      { waitUntil: "load" }
     );
   }
 
   async gotoLoginPage() {
-    await this.accountDropdown.click();
-    await this.loginLink.click();
+    await this.topBarComponent.gotoLoginPage();
   }
 
   async gotoRegisterPage() {
-    await this.accountDropdown.click();
-    await this.registerLink.click();
+    await this.topBarComponent.gotoRegisterPage();
   }
 
   async expectUrlMatch(regex: RegExp) {
-    await this.page.waitForURL(regex);
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        const currentUrl = this.page.url();
+        console.log(`Attempt ${attempts + 1}: Current URL is ${currentUrl}`);
+        await this.page.waitForURL(regex, { timeout: 5000 });
+        return;
+      } catch (error) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw new Error(
+            `Failed to match URL after ${maxAttempts} attempts: ${error.message}`
+          );
+        }
+      }
+    }
   }
 
   async expectHomeUrl() {
@@ -82,97 +84,20 @@ export class HomePage {
     await expect(this.page.locator(`text=${text}`)).toBeVisible();
   }
 
-  protected async expectErrorMessage(text: string) {
-    await this.alertDanger.waitFor({ state: "visible", timeout: 5000 });
-    await expect(this.alertDanger).toBeVisible();
-    if (text) {
-      await expect(this.alertDanger).toContainText(text);
-    }
-  }
-
-  async expectLogoutSuccess() {
-    await this.expectUrlMatch(HomePage.LOGOUT_SUCCESS_REGEX);
-    await expect(this.page.locator(this.successMessageLocator)).toHaveText(
-      HomePage.LOGOUT_HEADER_TEXT
-    );
-    await this.checkTextIsVisible(HomePage.LOGOUT_MESSAGE_1);
-    await this.checkTextIsVisible(HomePage.LOGOUT_MESSAGE_2);
-  }
-
-  protected getNavbarCategoryLocator(category: string): Locator {
-    return this.itemsBar.locator(`xpath=//a[text()='${category}']`);
-  }
-
-  protected getNavbarSubcategoryLocator(
-    category: string,
-    subcategory: string
-  ): Locator {
-    return this.getNavbarCategoryLocator(category).locator(
-      `xpath=..//a[contains(text(),'${subcategory}')]`
-    );
+  public async expectErrorMessage(text: string) {
+    await this.alertDangerComponent.expectErrorMessage(text);
   }
 
   async selectNavbarCategory(category: string, subcategory?: string) {
-    const categoryLocator = this.getNavbarCategoryLocator(category);
-    await categoryLocator.hover();
-    await categoryLocator.click();
-
-    if (subcategory) {
-      const subcategoryLocator = this.getNavbarSubcategoryLocator(
-        category,
-        subcategory
-      );
-      await subcategoryLocator.click();
-    }
+    await this.navBarCategory.selectNavbarCategory(category, subcategory);
   }
 
   async validateCategory() {
-    await this.expectUrlMatch(HomePage.CATEGORY_URL_REGEX);
-  }
-
-  private getProductContainerByName(productName: string): Locator {
-    return this.page.locator(
-      `xpath=//*[text()='${productName}']/ancestor::div[@class='product-thumb']`
-    );
-  }
-
-  private getAddToCartButtonByName(productName: string): Locator {
-    return this.getProductContainerByName(productName).locator(
-      "button:has-text('Add to Cart')"
-    );
-  }
-
-  private getAddToWishListButtonByName(productName: string): Locator {
-    return this.getProductContainerByName(productName).locator(
-      "button[data-original-title='Add to Wish List']"
-    );
-  }
-
-  private getCompareButtonByName(productName: string): Locator {
-    return this.getProductContainerByName(productName).locator(
-      "button[data-original-title='Compare this Product']"
-    );
-  }
-
-  public async addToCart(productName: string) {
-    const addToCartButton = this.getAddToCartButtonByName(productName);
-    await addToCartButton.click();
-  }
-
-  public async addToWishList(productName: string) {
-    const addToWishListButton = this.getAddToWishListButtonByName(productName);
-    await addToWishListButton.click();
-  }
-
-  public async compareProduct(productName: string) {
-    const compareButton = this.getCompareButtonByName(productName);
-    await compareButton.click();
+    await this.navBarCategory.validateCategory();
   }
 
   private async validateSuccessAlert(expectedMessage: string) {
-    await this.successAlert.waitFor({ state: "visible", timeout: 5000 });
-    await expect(this.successAlert).toBeVisible();
-    await expect(this.successAlert).toContainText(expectedMessage);
+    await this.successAlertComponent.expectSuccessMessage(expectedMessage);
   }
 
   public async validateAddToCartSuccess(productName: string) {
@@ -193,8 +118,8 @@ export class HomePage {
     );
   }
 
-  public async goToShoppingCart() {
-    await this.shoppingCartLink.click();
+  public async goToShoppingCart(): Promise<void> {
+    await this.topBarComponent.goToShoppingCart();
   }
 
   public async validateProductInTable(productName: string) {
@@ -207,5 +132,17 @@ export class HomePage {
 
   public async validateItemRemovedFromTable(productName: string): Promise<void> {
     await this.itemsTable.validateItemRemoved(productName);
+  }
+
+  public async addToCart(productName: string): Promise<void> {
+    await this.itemBox.addToCart(productName);
+  }
+
+  public async addToWishList(productName: string): Promise<void> {
+    await this.itemBox.addToWishList(productName);
+  }
+
+  public async compareProduct(productName: string): Promise<void> {
+    await this.itemBox.compareProduct(productName);
   }
 }

@@ -37,7 +37,15 @@ export class LoginPage extends HomePage {
     await this.expectErrorMessage(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE);
   }
 
-  async isVisibleMaxAttempsMssg() {
-    return this.alertDanger.getByText(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE).isVisible();
+  async isVisibleMaxAttempsMssg(): Promise<boolean> {
+    if (!this.alertDangerComponent) {
+      throw new Error("alertDangerComponent is not initialized.");
+    }
+    try {
+      await this.alertDangerComponent.expectContainsText(LoginPage.LOGIN_ERROR_ATTMPTS_MESSAGE);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
