@@ -10,7 +10,27 @@ let homePage: HomePage;
 let loginPage: LoginPage;
 let accountPage: AccountPage;
 
+async function setupShoppingCart(homePage: HomePage, productName: string) {
+  logStep(`Search and navigate to category containing ${productName}`);
+  await homePage.selectNavbarCategory('Desktops', 'Show All Desktops');
+  await homePage.validateCategory();
+
+  logStep(`Add ${productName} to shopping cart`);
+  await homePage.addToCart(productName);
+
+  logStep(`Validate success message for adding ${productName} to shopping cart`);
+  await homePage.validateAddToCartSuccess(productName);
+
+  logStep('Navigate to shopping cart');
+  await homePage.goToShoppingCart();
+
+  logStep(`Validate ${productName} exists in shopping cart`);
+  await homePage.validateProductInTable(productName);
+}
+
 test.describe('Your Site Web Page: Add to Cart Feature', () => {
+  const productName = 'Sony VAIO';
+
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
@@ -36,5 +56,21 @@ test.describe('Your Site Web Page: Add to Cart Feature', () => {
 
     logStep(`Validate comparison success message for ${productName}`);
     await homePage.validateComparisonSuccess(productName);
+  });
+
+  test('YS-12: Should validate product added to shopping cart', async ({ page }) => {
+    const productName: string = 'Sony VAIO';
+    await setupShoppingCart(homePage, productName);
+  });
+
+  test('YS-13: Should validate product removed from shopping cart', async ({ page }) => {
+    const productName: string = 'Sony VAIO';
+    await setupShoppingCart(homePage, productName);
+
+    logStep(`Remove ${productName} from shopping cart`);
+    await homePage.removeItemFromTable(productName);
+
+    logStep(`Validate ${productName} is removed from shopping cart`);
+    await homePage.validateItemRemovedFromTable(productName);
   });
 });

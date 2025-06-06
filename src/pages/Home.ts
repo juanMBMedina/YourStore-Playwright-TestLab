@@ -1,4 +1,5 @@
 import { Locator, Page, expect } from "@playwright/test";
+import { ItemsTable } from "../components/ItemsTable";
 
 export class HomePage {
   private static readonly HOME_URL_REGEX = /route=common\/home/;
@@ -18,6 +19,7 @@ export class HomePage {
   private static readonly ADD_TO_COMPARISON_SUCCESS_MESSAGE = (
     productName: string
   ) => `Success: You have added ${productName} to your product comparison!`;
+  protected readonly shoppingCartLink: Locator;
   protected readonly topBar: Locator;
   protected readonly accountDropdown: Locator;
   protected readonly loginLink: Locator;
@@ -28,6 +30,7 @@ export class HomePage {
   protected readonly successMessageLocator = "#content h1";
   protected readonly successMessageTextLocator = "#content p:first-of-type";
   protected readonly successAlert: Locator;
+  private readonly itemsTable: ItemsTable;
 
   constructor(page: Page) {
     this.page = page;
@@ -35,13 +38,18 @@ export class HomePage {
     this.accountDropdown = page.locator(
       '#top-links .dropdown a[title="My Account"]'
     );
-    this.loginLink = page.locator('ul.dropdown-menu-right a:text("Login")');
+    this.loginLink = this.topBar.locator(
+      'ul.dropdown-menu-right a:text("Login")'
+    );
     this.registerLink = page.locator(
       'ul.dropdown-menu-right a:text("Register")'
     );
+    this.shoppingCartLink = this.topBar.locator("li a[title='Shopping Cart']");
+
     this.alertDanger = page.locator(".alert.alert-danger.alert-dismissible");
     this.itemsBar = page.locator("nav#menu");
     this.successAlert = page.locator(".alert.alert-success.alert-dismissible");
+    this.itemsTable = new ItemsTable(page);
   }
 
   async goto() {
@@ -123,7 +131,9 @@ export class HomePage {
   }
 
   private getProductContainerByName(productName: string): Locator {
-    return this.page.locator(`xpath=//*[text()='${productName}']/ancestor::div[@class='product-thumb']`);
+    return this.page.locator(
+      `xpath=//*[text()='${productName}']/ancestor::div[@class='product-thumb']`
+    );
   }
 
   private getAddToCartButtonByName(productName: string): Locator {
@@ -181,5 +191,21 @@ export class HomePage {
     await this.validateSuccessAlert(
       HomePage.ADD_TO_COMPARISON_SUCCESS_MESSAGE(productName)
     );
+  }
+
+  public async goToShoppingCart() {
+    await this.shoppingCartLink.click();
+  }
+
+  public async validateProductInTable(productName: string) {
+    await this.itemsTable.validateItemExists(productName);
+  }
+
+  public async removeItemFromTable(productName: string): Promise<void> {
+    await this.itemsTable.removeItem(productName);
+  }
+
+  public async validateItemRemovedFromTable(productName: string): Promise<void> {
+    await this.itemsTable.validateItemRemoved(productName);
   }
 }

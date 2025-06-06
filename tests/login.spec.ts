@@ -84,7 +84,7 @@ test.describe("Your Site Web Page: Login Feature", () => {
     });
   });
 
-  test.describe("YS-13: Max login attempts not reached", () => {
+  test.describe("YS-14: Max login attempts not reached", () => {
     test("Should validate that lockout message is NOT shown before reaching max attempts", async ({ page }) => {
       await goToLogin(homePage, loginPage);
 
