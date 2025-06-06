@@ -35,14 +35,8 @@ export class ItemsTable {
   }
 
   public async validateItemRemoved(productName: string): Promise<void> {
-    const tableResponsive = this.getTableResponsive();
     const itemRow = this.getItemRow(productName);
-
-    if (await tableResponsive.isVisible()) {
-      await expect(itemRow).not.toBeVisible();
-    } else {
-      await expect(tableResponsive).not.toBeVisible();
-    }
+    await expect(itemRow).not.toBeVisible();
   }
 
   public async validateItemExists(productName: string): Promise<void> {

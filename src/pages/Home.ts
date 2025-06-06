@@ -41,7 +41,7 @@ export class HomePage {
   async goto() {
     await this.page.goto(
       "https://opencart.abstracta.us/index.php?route=common/home",
-      { waitUntil: "load" }
+      { waitUntil: "networkidle" }
     );
   }
 

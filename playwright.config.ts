@@ -50,7 +50,7 @@ export default defineConfig({
         launchOptions: { args: ["--start-maximized"] },
       },
     },
-    /*
+  
     {
       name: "edge",
       use: {
@@ -69,7 +69,6 @@ export default defineConfig({
         deviceScaleFactor: undefined,
       },
     },
-    */
    
     /* Test against mobile viewports. */
     // {

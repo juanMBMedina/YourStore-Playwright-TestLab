@@ -26,11 +26,13 @@ export class TopBar {
   async gotoLoginPage() {
     await this.accountDropdown.click();
     await this.loginLink.click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   async gotoRegisterPage() {
     await this.accountDropdown.click();
     await this.registerLink.click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   public async goToShoppingCart(): Promise<void> {

@@ -6,22 +6,22 @@ import { RegisterPage } from "../pages/Register";
 
 export async function goToLogin(homePage: HomePage, loginPage: LoginPage) {
   logStep("1. Go to the main page");
-  homePage.goto();
-  homePage.expectHomeUrl();
+  await homePage.goto();
+  await homePage.expectHomeUrl();
 
   logStep("2. Go to login section");
-  homePage.gotoLoginPage();
-  loginPage.expectLoginUrl();
+  await homePage.gotoLoginPage();
+  await loginPage.expectLoginUrl();
 }
 
 export async function goToRegister(homePage: HomePage, registerPage: RegisterPage) {
   logStep("1. Go to the main page");
-  homePage.goto();
-  homePage.expectHomeUrl();
+  await homePage.goto();
+  await homePage.expectHomeUrl();
 
   logStep("2. Go to register section");
-  homePage.gotoRegisterPage();
-  registerPage.expectRegisterUrl();
+  await homePage.gotoRegisterPage();
+  await registerPage.expectRegisterUrl();
 }
 
 export function logStep(step: string) {
