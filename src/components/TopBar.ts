@@ -18,7 +18,7 @@ export class TopBar {
     this.registerLink = page.locator('nav#top ul.dropdown-menu-right a:text("Register")');
     this.shoppingCartLink = page.locator('nav#top li a[title="Shopping Cart"]');
     this.currencyDropdown = page.locator('nav#top #form-currency .dropdown-toggle');
-    this.wishListLink = page.locator('nav#top #top-links a[title="Wish List"]');
+    this.wishListLink = page.locator('nav#top #top-links a[title*="Wish List"]');
     this.checkoutLink = page.locator('nav#top #top-links a[title="Checkout"]');
     this.logoutLink = page.locator("#top-links ul.dropdown-menu-right a[href*='logout']");
   }

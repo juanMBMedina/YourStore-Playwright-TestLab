@@ -1,36 +1,56 @@
-import { test } from '@playwright/test';
-import { HomePage } from '../src/pages/Home';
-import { LoginPage } from '../src/pages/Login';
-import { goToLogin, logStep } from '../src/utils/auth-utils';
-import { UserLogin } from '../src/models/UserLogin';
-import { AccountPage } from '../src/pages/Account';
+import { test } from "@playwright/test";
+import { HomePage } from "../src/pages/Home";
+import { LoginPage } from "../src/pages/Login";
+import { goToLogin, logStep } from "../src/utils/auth-utils";
+import { UserLogin } from "../src/models/UserLogin";
+import { AccountPage } from "../src/pages/Account";
+import { Product } from "../src/models/Product";
 import userData from "../resources/files/dataLoginFeature.json";
+import dataAddToCartFeature from "../resources/files/dataAddToCartFeature.json";
 
 let homePage: HomePage;
 let loginPage: LoginPage;
 let accountPage: AccountPage;
 
-async function setupShoppingCart(homePage: HomePage, productName: string) {
-  logStep(`Search and navigate to category containing ${productName}`);
-  await homePage.selectNavbarCategory('Desktops', 'Show All Desktops');
+async function searchProduct(homePage: HomePage, product: Product) {
+  logStep(`Search and navigate to category containing ${product.name}`);
+  await homePage.selectNavbarCategory(product.category, product.subcategory);
   await homePage.validateCategory();
-
-  logStep(`Add ${productName} to shopping cart`);
-  await homePage.addToCart(productName);
-
-  logStep(`Validate success message for adding ${productName} to shopping cart`);
-  await homePage.validateAddToCartSuccess(productName);
-
-  logStep('Navigate to shopping cart');
-  await homePage.goToShoppingCart();
-
-  logStep(`Validate ${productName} exists in shopping cart`);
-  await homePage.validateProductInTable(productName);
 }
 
-test.describe('Your Site Web Page: Add to Cart Feature', () => {
-  const productName = 'Sony VAIO';
+async function setupShoppingCart(homePage: HomePage, product: Product) {
+  searchProduct(homePage, product);
 
+  logStep(`Add ${product.name} to shopping cart`);
+  await homePage.addToCart(product.name);
+
+  logStep(
+    `Validate success message for adding ${product.name} to shopping cart`
+  );
+  await homePage.validateAddToCartSuccess(product.name);
+
+  logStep("Navigate to shopping cart");
+  await homePage.goToShoppingCart();
+
+  logStep(`Validate ${product.name} exists in shopping cart`);
+  await homePage.validateProductInTable(product.name);
+}
+
+async function setupWhisList(homePage: HomePage, product: Product) {
+  searchProduct(homePage, product);
+
+  logStep(`Add ${product.name} to favorites list`);
+  await homePage.addToWishList(product.name);
+  await homePage.validateWishListSuccess(product.name);
+
+  logStep("Navigate to Wish List");
+  await homePage.goToWishList();
+
+  logStep(`Validate ${product.name} exists in favorites list`);
+  await homePage.validateProductInTable(product.name);
+}
+
+test.describe("Your Site Web Page: Add to Cart Feature", () => {
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
@@ -41,36 +61,59 @@ test.describe('Your Site Web Page: Add to Cart Feature', () => {
     logStep("Log in with valid user credentials");
     await loginPage.expectLoginUrl();
     await loginPage.login(new UserLogin(userData.loginExistUser));
-    await accountPage.expectAccountUrl(); 
+    await accountPage.expectAccountUrl();
   });
 
-  test('YS-9: Should show a confirmation message when adding a product to comparison', async ({ page }) => {
-    const productName: string = 'iMac';
+  test("YS-9: Should show a confirmation message when adding a product to comparison", async ({
+    page,
+  }) => {
+    const product = new Product(dataAddToCartFeature.comparisonItem);
 
-    logStep(`Search and navigate to category containing ${productName}`);
-    await homePage.selectNavbarCategory('Desktops', 'Mac');
-    await homePage.validateCategory();
+    logStep(`Search and navigate to category containing ${product.name}`);
+    searchProduct(homePage, product);
 
-    logStep(`Add ${productName} to comparison list`);
-    await homePage.compareProduct(productName);
+    logStep(`Add ${product.name} to comparison list`);
+    await homePage.compareProduct(product.name);
 
-    logStep(`Validate comparison success message for ${productName}`);
-    await homePage.validateComparisonSuccess(productName);
+    logStep(`Validate comparison success message for ${product.name}`);
+    await homePage.validateComparisonSuccess(product.name);
   });
 
-  test('YS-12: Should validate product added to shopping cart', async ({ page }) => {
-    const productName: string = 'Sony VAIO';
-    await setupShoppingCart(homePage, productName);
+
+  test("YS-10: Validate the selection of a favorite product", async ({ page }) => {
+    const product = new Product(dataAddToCartFeature.wishListItem);
+    await setupWhisList(homePage, product);
   });
 
-  test('YS-13: Should validate product removed from shopping cart', async ({ page }) => {
-    const productName: string = 'Sony VAIO';
-    await setupShoppingCart(homePage, productName);
+  test("YS-11: Validate the removal of a favorite product", async ({ page }) => {
+    const product = new Product(dataAddToCartFeature.wishListItem);
+    await setupWhisList(homePage, product);
 
-    logStep(`Remove ${productName} from shopping cart`);
-    await homePage.removeItemFromTable(productName);
+    logStep("Remove product from favorites");
+    await homePage.removeItemFromTable(product.name);
 
-    logStep(`Validate ${productName} is removed from shopping cart`);
-    await homePage.validateItemRemovedFromTable(productName);
+    logStep("Validate product is removed from favorites list");
+    await homePage.validateItemRemovedFromTable(product.name);
   });
+
+  test("YS-12: Should validate product added to shopping cart", async ({
+    page,
+  }) => {
+    const product = new Product(dataAddToCartFeature.addToCartItem);
+    await setupShoppingCart(homePage, product);
+  });
+
+  test("YS-13: Should validate product removed from shopping cart", async ({
+    page,
+  }) => {
+    const product = new Product(dataAddToCartFeature.addToCartItem);
+    await setupShoppingCart(homePage, product);
+
+    logStep(`Remove ${product.name} from shopping cart`);
+    await homePage.removeItemFromTable(product.name);
+
+    logStep(`Validate ${product.name} is removed from shopping cart`);
+    await homePage.validateItemRemovedFromTable(product.name);
+  });
+
 });

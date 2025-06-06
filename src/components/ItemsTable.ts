@@ -25,7 +25,7 @@ export class ItemsTable {
 
   public getRemoveButton(productName: string): Locator {
     return this.getItemRow(productName).locator(
-      "xpath=//button[@data-original-title='Remove']"
+      "xpath=//*[@data-original-title='Remove']"
     );
   }
 

@@ -13,7 +13,7 @@ export class HomePage {
   private static readonly ADD_TO_WISHLIST_LOGIN_REQUIRED_MESSAGE = (
     productName: string
   ) =>
-    `You must login or create an account to save ${productName} to your wish list!`;
+    `Success: You have added ${productName} to your wish list!`;
   private static readonly ADD_TO_COMPARISON_SUCCESS_MESSAGE = (
     productName: string
   ) => `Success: You have added ${productName} to your product comparison!`;
@@ -106,7 +106,7 @@ export class HomePage {
     );
   }
 
-  public async validateWishListLoginRequired(productName: string) {
+  public async validateWishListSuccess(productName: string) {
     await this.validateSuccessAlert(
       HomePage.ADD_TO_WISHLIST_LOGIN_REQUIRED_MESSAGE(productName)
     );
@@ -120,6 +120,10 @@ export class HomePage {
 
   public async goToShoppingCart(): Promise<void> {
     await this.topBarComponent.goToShoppingCart();
+  }
+
+  async goToWishList() {
+    await this.topBarComponent.goToWishList();
   }
 
   public async validateProductInTable(productName: string) {
