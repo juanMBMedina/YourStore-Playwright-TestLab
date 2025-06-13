@@ -36,14 +36,14 @@ pipeline {
             steps {
                 script {
                     echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
-                    def playwrightCommand = ''
+                    def playwrightCommand = 'ls -ltr && '
 
                     if (params.COVERAGE) {
-                        playwrightCommand = 'npm run coverage'
+                        playwrightCommand += 'npm run coverage'
                     } else if (params.SUITE == 'all-tests') {
-                        playwrightCommand = 'npm run test:all'
+                        playwrightCommand += 'npm run test:all'
                     } else {
-                        playwrightCommand = 'npm run test'
+                        playwrightCommand += 'npm run test'
                     }
 
                     env.SUITE = params.SUITE
