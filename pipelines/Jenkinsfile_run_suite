@@ -65,20 +65,16 @@ pipeline {
                     echo "Changed directory to: ${env.TEMP_DIR}"
 
                     script {
-                        echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
+                        echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
                         def playwrightCommand = ''
 
-                        if (params.COVERAGE) {
+                        if (env.COVERAGE) {
                             playwrightCommand = 'npm run coverage'
-                        } else if (params.SUITE == 'all-tests') {
+                        } else if (env.SUITE == 'all-tests') {
                             playwrightCommand = 'npm run test:all'
                         } else {
                             playwrightCommand = 'npm run test'
                         }
-
-                        env.SUITE = params.SUITE
-                        env.BROWSER = params.BROWSER
-                        env.WORKERS = params.WORKERS
 
                         sh """
                             docker-compose -f docker-compose.playwright.yml run --rm \
