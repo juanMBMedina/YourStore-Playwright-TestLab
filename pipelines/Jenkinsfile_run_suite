@@ -24,9 +24,16 @@ pipeline {
             description: 'Number of parallel processes to run tests'
         )
 
+<<<<<<< HEAD
         booleanParam(
             name: 'COVERAGE',
             defaultValue: false,
+=======
+        string(
+            name: 'COVERAGE',
+            choices: ['false', 'true'],
+            defaultValue: 'false',
+>>>>>>> 4ca9744a1a657c9efac85e20459893b9f99824d8
             description: 'Enable or disable code coverage reporting'
         )
     }
@@ -37,12 +44,22 @@ pipeline {
                 script {
                     echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
                     def playwrightCommand = ''
+<<<<<<< HEAD
 
                     if (params.SUITE == 'all-tests' && !params.COVERAGE) {
                         playwrightCommand = 'npm run test:all'
                     } else if (params.SUITE != 'all-tests' && params.COVERAGE) {
                         playwrightCommand = 'npm run coverage'
                     } else if (params.SUITE != 'all-tests' && !params.COVERAGE) {
+=======
+                    def coverage = params.COVERAGE == 'true'
+
+                    if (params.SUITE == 'all-tests' && !params.COVERAGE){
+                        playwrightCommand = 'npm run test:all'
+                    }else if (params.SUITE != 'all-tests' && params.COVERAGE) {
+                        playwrightCommand = 'npm run test:coverage'
+                    }else if (params.SUITE != 'all-tests' && !params.COVERAGE) {
+>>>>>>> 4ca9744a1a657c9efac85e20459893b9f99824d8
                         playwrightCommand = 'npm run test'
                     }
 
