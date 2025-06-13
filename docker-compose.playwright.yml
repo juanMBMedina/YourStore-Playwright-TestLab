@@ -7,7 +7,7 @@ services:
       dockerfile: ./dockerfiles/Dockerfile.playwright
     working_dir: /app
     volumes:
-      - ${pwd}:/app
+      - ${PWD}:/app
     environment:
       SUITE: ${SUITE:-login}
       BROWSER: ${BROWSER:-chrome}
