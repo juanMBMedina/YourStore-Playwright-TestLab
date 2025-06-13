@@ -14,6 +14,17 @@ The repository includes:
 ## File Structure
 ```
 📦 YourStore-Playwright-TestLab
+├── 📁 dockerfiles
+├── 📁 pipelines
+├── 📁 resources
+│ └── 📁 files
+├── 📁 src
+│ ├── 📁 components
+│ ├── 📁 models
+│ ├── 📁 pages
+│ └── 📁 utils
+├── 📁 test_plan
+└── 📁 tests
 
 
 ```
@@ -34,14 +45,16 @@ git clone git@github.com:juanMBMedina/YourStore-Playwright-TestLab.git
 cd YourStore-Playwright-TestLab
 ```
 
-To run tests with a specific browser (e.g., Edge) and remote mode, remote mode have the parameter headless by default:
+To run tests with a specific browser (e.g., Edge) and remote mode, remote mode have the parameter headless by default, see package.json:
 ```bash
-run suites
+npm run test
+"npm run test " -> playwright test tests/${SUITE:-login}.spec.ts --project=${BROWSER:-chromium}
 ```
 
 Or set the environment variable before running:
 ```bash
-run suites
+export SUITE=login
+export BROWSER=chrome
 ```
 Run sonar-scanner in Local Environment:
 ```bash
