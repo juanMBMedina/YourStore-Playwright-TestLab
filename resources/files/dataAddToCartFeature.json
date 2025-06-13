@@ -1,0 +1,18 @@
+{
+  "comparisonItem": {
+    "name": "Sony VAIO",
+    "category": "Desktops",
+    "subcategory": "Show All Desktops"
+  },
+
+  "wishListItem": {
+    "name": "iMac",
+    "category": "Desktops",
+    "subcategory": "Mac"
+  },
+
+  "addToCartItem": {
+    "name": "iPhone",
+    "category": "Phones & PDAs"
+  }
+}

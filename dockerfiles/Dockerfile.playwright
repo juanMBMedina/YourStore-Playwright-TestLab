@@ -1,0 +1,21 @@
+
+FROM mcr.microsoft.com/playwright:v1.53.0-noble
+
+# Create working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+RUN npx playwright install chrome firefox msedge
+
+# Create directories for reports
+RUN mkdir -p test-results playwright-report coverage allure-results
+
+# Set proper permissions
+RUN chmod -R 755 /app
+
+# Default command to run tests
+CMD ["sh", "-c", "npm run test"]

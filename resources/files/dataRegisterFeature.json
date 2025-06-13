@@ -1,0 +1,109 @@
+{
+  "userExist": {
+    "firstName": "Mitchel",
+    "lastName": "Kihn-Kuhic",
+    "email": "Maritza.Reilly@hotmail.com",
+    "telephone": "99729724380263",
+    "password": "wrong_password",
+    "checkPrivacy": true,
+    "subscribe": true
+  },
+
+  "userWithoutPrivacy": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "yoursite@test1.com",
+    "telephone": "123456789",
+    "password": "password123",
+    "confirmPassword": "password123",
+    "subscribe": false,
+    "checkPrivacy": false
+  },
+
+  "scenarios": [
+    {
+      "description": "First Name is void",
+      "userData": {
+        "firstName": "",
+        "lastName": "Doe",
+        "email": "yoursite@test1.com",
+        "telephone": "123456789",
+        "password": "password123",
+        "confirmPassword": "password123",
+        "subscribe": false,
+        "checkPrivacy": true
+      },
+      "expectedErrors": ["First Name must be between 1 and 32 characters!"]
+    },
+    {
+      "description": "Last Name is void",
+      "userData": {
+        "firstName": "John",
+        "lastName": "",
+        "email": "yoursite@test1.com",
+        "telephone": "123456789",
+        "password": "password123",
+        "confirmPassword": "password123",
+        "subscribe": false,
+        "checkPrivacy": true
+      },
+      "expectedErrors": ["Last Name must be between 1 and 32 characters!"]
+    },
+    {
+      "description": "Email is void",
+      "userData": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "",
+        "telephone": "123456789",
+        "password": "password123",
+        "confirmPassword": "password123",
+        "subscribe": false,
+        "checkPrivacy": true
+      },
+      "expectedErrors": ["E-Mail Address does not appear to be valid!"]
+    },
+    {
+      "description": "Telephone is void",
+      "userData": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "yoursite@test1.com",
+        "telephone": "",
+        "password": "password123",
+        "confirmPassword": "password123",
+        "subscribe": false,
+        "checkPrivacy": true
+      },
+      "expectedErrors": ["Telephone must be between 3 and 32 characters!"]
+    },
+    {
+      "description": "Password is void",
+      "userData": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "yoursite@test1.com",
+        "telephone": "123456789",
+        "password": "",
+        "confirmPassword": "",
+        "subscribe": false,
+        "checkPrivacy": true
+      },
+      "expectedErrors": ["Password must be between 4 and 20 characters!"]
+    },
+    {
+      "description": "Password and confirmation password do not match",
+      "userData": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "yoursite@test1.com",
+        "telephone": "123456789",
+        "password": "password123",
+        "confirmPassword": "differentPassword",
+        "subscribe": false,
+        "checkPrivacy": true
+      },
+      "expectedErrors": ["Password confirmation does not match password!"]
+    }
+  ]
+}
