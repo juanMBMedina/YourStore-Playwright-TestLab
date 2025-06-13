@@ -6,7 +6,6 @@ pipeline {
         BROWSER = "chrome"
         WORKERS = "2"
         TEMP_DIR = "/var/jenkins_home/temp/playwright"
-        ORIGINAL_DIR = env.WORKSPACE // Save the original directory
     }
 
     parameters {
@@ -38,6 +37,7 @@ pipeline {
         stage('Prepare files in temporal directory') {
            steps {
                 script {
+                    env.ORIGINAL_DIR = env.WORKSPACE // Save the original directory
                     echo "Preparing files in temporary directory: ${env.TEMP_DIR}"
                     sh """
                         mkdir -p ${env.TEMP_DIR}
