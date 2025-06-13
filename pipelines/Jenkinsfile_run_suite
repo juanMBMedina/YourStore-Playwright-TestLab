@@ -77,7 +77,7 @@ pipeline {
                                 -e SUITE=${env.SUITE} \
                                 -e BROWSER=${env.BROWSER} \
                                 -e WORKERS=${env.WORKERS} \
-                                playwright
+                                playwright ${playwrightCommand}
                         """
                     }
                 }
