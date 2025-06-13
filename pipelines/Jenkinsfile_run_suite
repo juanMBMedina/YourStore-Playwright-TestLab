@@ -5,6 +5,8 @@ pipeline {
         SUITE = "login"
         BROWSER = "chrome"
         WORKERS = "2"
+        TEMP_DIR = "/var/jenkins_home/temp/playwright"
+        ORIGINAL_DIR = "${pwd}" // Save the original directory
     }
 
     parameters {
@@ -32,38 +34,86 @@ pipeline {
     }
 
     stages {
+
+        stage('Prepare files in temporal directory') {
+           steps {
+                script {
+                    echo "Preparing files in temporary directory: ${env.TEMP_DIR}"
+                    sh """
+                        mkdir -p ${env.TEMP_DIR}
+                        cp -r ./* ${env.TEMP_DIR}/
+                    """
+                }
+            }
+        }
+
         stage('Run Playwright Tests in Docker') {
             steps {
-                script {
-                    echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
-                    def playwrightCommand = ''
+                dir("${env.TEMP_DIR}") {
+                    echo "Changed directory to: ${env.TEMP_DIR}"
 
-                    if (params.COVERAGE) {
-                        playwrightCommand = 'npm run coverage'
-                    } else if (params.SUITE == 'all-tests') {
-                        playwrightCommand = 'npm run test:all'
-                    } else {
-                        playwrightCommand = 'npm run test'
+                    script {
+                        echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
+                        def playwrightCommand = ''
+
+                        if (params.COVERAGE) {
+                            playwrightCommand = 'npm run coverage'
+                        } else if (params.SUITE == 'all-tests') {
+                            playwrightCommand = 'npm run test:all'
+                        } else {
+                            playwrightCommand = 'npm run test'
+                        }
+
+                        env.SUITE = params.SUITE
+                        env.BROWSER = params.BROWSER
+                        env.WORKERS = params.WORKERS
+
+                        sh """
+                            docker-compose -f docker-compose.playwright.yml run --rm \
+                                -e SUITE=${env.SUITE} \
+                                -e BROWSER=${env.BROWSER} \
+                                -e WORKERS=${env.WORKERS} \
+                                playwright ${playwrightCommand}
+                        """
                     }
+                }
+            }
+        }
 
-                    env.SUITE = params.SUITE
-                    env.BROWSER = params.BROWSER
-                    env.WORKERS = params.WORKERS
-
+        stage('Copy report folder to original directory') {
+            steps {
+                script {
+                    echo "Copying report folder back to original directory"
                     sh """
-                        echo "Current directory contents (Jenkins):" && ls -ltr && \
-                        echo "Current directory contents (Docker - playwright):" && \
-                        docker-compose -f docker-compose.playwright.yml run --rm playwright ls -la && \
-                        docker-compose -f docker-compose.playwright.yml run --rm playwright ls -la /app
-
-                    """    
-                    sh """
-                        docker-compose -f docker-compose.playwright.yml run --rm \
-                            -e SUITE=${env.SUITE} \
-                            -e BROWSER=${env.BROWSER} \
-                            -e WORKERS=${env.WORKERS} \
-                            playwright ${playwrightCommand}
+                        cp -r ${env.TEMP_DIR}/playwright-report ./
                     """
+                }
+            }
+        }
+
+        stage('Publish report') {
+            steps {
+                script {
+                    echo 'Publishing Playwright Reports'
+                    dir(env.ORIGINAL_DIR) { // Change directory using dir()
+                        publishHTML(target: [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: './playwright-report/',
+                            reportFiles: 'index.html',
+                            reportName: "${params.SUITE}-Playwright-Report"
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('Clean temporal directory') {
+            steps {
+                script {
+                    echo "Cleaning up temporary directory: ${env.TEMP_DIR}, excluding node_modules folder"
+                    sh "find ${env.TEMP_DIR} -mindepth 1 -not -name 'node_modules' -exec rm -rf {} +"
                 }
             }
         }
@@ -71,24 +121,13 @@ pipeline {
 
     post {
         success {
-            echo 'Tests executed successfully. Playwright report is available.'
+            echo 'Pipeline executed successfully.'
         }
         failure {
-            echo 'Tests failed. Please check the execution logs and generated report.'
+            echo 'Pipeline failed. Please check the logs.'
         }
         always {
-            script {
-                echo 'Store Playwright Reports'
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: './playwright-report/',
-                    reportFiles: 'index.html',
-                    reportName: "${params.SUITE}-Playwright-Report"
-                ])
-                echo 'Pipeline execution finished.'
-            }
+            echo 'Pipeline execution finished.'
         }
     }
 }

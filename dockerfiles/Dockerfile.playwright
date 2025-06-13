@@ -11,6 +11,3 @@ RUN npm ci
 
 # Install browsers as root
 RUN npx playwright install chrome firefox msedge
-
-# Default command (can be overridden by docker-compose run ...)
-CMD ["npm", "run", "test"]

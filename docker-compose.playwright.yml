@@ -6,8 +6,9 @@ services:
       context: .
       dockerfile: ./dockerfiles/Dockerfile.playwright
     working_dir: /app
+    entrypoint: ["sh", "-c", "npm install"]
     volumes:
-      - .:/app
+      - playwright_src:/app
     environment:
       SUITE: ${SUITE:-login}
       BROWSER: ${BROWSER:-chrome}
@@ -17,4 +18,9 @@ services:
 
 networks:
   project-network:
+    external: true
+
+volumes:
+  playwright_src:
+    name: playwright_src
     external: true

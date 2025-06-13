@@ -15,6 +15,7 @@ services:
       - jenkins_home:/var/jenkins_home
       - sonar_scanner_src:/var/jenkins_home/tmp/sonar-scanner
       - cypress_src:/var/jenkins_home/tmp/cypress
+      - playwright_src:/var/jenkins_home/tmp/playwright
       - /var/run/docker.sock:/var/run/docker.sock
       - ~/.m2:/root/.m2
     environment:
@@ -75,7 +76,9 @@ volumes:
   sonar_scanner_src:
     name: sonar_scanner_src
   cypress_src:
-    name: cypress_src 
+    name: cypress_src
+  playwright_src:
+    name: playwright_src 
 
 networks:
   project-network:
