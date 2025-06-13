@@ -71,8 +71,6 @@ pipeline {
         }
         always {
             script {
-                // Use the same docker-compose file as in run
-                sh "docker-compose -f docker-compose.yml down"
 
                 echo 'Store Playwright Reports'
                 publishHTML(target: [
