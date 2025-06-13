@@ -86,7 +86,7 @@ pipeline {
                     dir("${env.TEMP_DIR}") {
                         echo "Copying report folder back to original directory"
                         sh """
-                            cp -r ${env.TEMP_DI}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report
+                            cp -r ${env.TEMP_DIR}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report
                             echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report"
                         """
                     }
