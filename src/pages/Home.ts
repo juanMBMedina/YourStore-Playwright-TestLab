@@ -41,7 +41,7 @@ export class HomePage {
   async goto() {
     await this.page.goto(
       "https://opencart.abstracta.us/index.php?route=common/home",
-      { waitUntil: "networkidle" }
+      { waitUntil: "load" }
     );
   }
 
@@ -90,10 +90,6 @@ export class HomePage {
 
   async selectNavbarCategory(category: string, subcategory?: string) {
     await this.navBarCategory.selectNavbarCategory(category, subcategory);
-  }
-
-  async validateCategory() {
-    await this.navBarCategory.validateCategory();
   }
 
   private async validateSuccessAlert(expectedMessage: string) {

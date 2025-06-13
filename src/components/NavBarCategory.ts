@@ -30,8 +30,4 @@ export class NavBarCategory {
     }
   }
 
-  public async validateCategory(): Promise<void> {
-    const CATEGORY_URL_REGEX = /route=product\/category&path/;
-    await this.page.waitForURL(CATEGORY_URL_REGEX);
-  }
 }

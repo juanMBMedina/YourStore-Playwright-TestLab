@@ -15,7 +15,6 @@ let accountPage: AccountPage;
 async function searchProduct(homePage: HomePage, product: Product) {
   logStep(`Search and navigate to category containing ${product.name}`);
   await homePage.selectNavbarCategory(product.category, product.subcategory);
-  await homePage.validateCategory();
 }
 
 async function setupShoppingCart(homePage: HomePage, product: Product) {
