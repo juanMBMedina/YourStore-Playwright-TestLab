@@ -51,6 +51,7 @@ pipeline {
                     env.WORKERS = params.WORKERS
 
                     sh """
+                    ls -ltr && \
                         docker-compose -f docker-compose.playwright.yml run --rm \
                             -e SUITE=${env.SUITE} \
                             -e BROWSER=${env.BROWSER} \
