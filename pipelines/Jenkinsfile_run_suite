@@ -6,7 +6,7 @@ pipeline {
         BROWSER = "chrome"
         WORKERS = "2"
         TEMP_DIR = "/var/jenkins_home/temp/playwright"
-        ORIGINAL_DIR = WORKSPACE // Save the original directory
+        ORIGINAL_DIR = env.WORKSPACE // Save the original directory
     }
 
     parameters {
