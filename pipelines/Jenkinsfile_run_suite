@@ -1,69 +1,61 @@
-def waitForSeleniumGridUp(String url = "http://selenium-hub:4444/status", int maxRetries = 3, int waitSeconds = 5) {
-    int attempt = 0
-    while (attempt < maxRetries) {
-        try {
-            def response = sh(
-                script: "curl -s -o /dev/null -w \"%{http_code}\" ${url}",
-                returnStdout: true
-            ).trim()
-
-            if (response == "200") {
-                echo "✅ Selenium Grid is up (HTTP ${response})"
-                return true
-            } else {
-                throw new Exception("Unexpected response code: ${response}")
-            }
-        } catch (Exception e) {
-            attempt++
-            if (attempt >= maxRetries) {
-                error "❌ Selenium Grid is not available after ${maxRetries} attempts. Last response: ${e.message}"
-            } else {
-                echo "⏳ Selenium Grid not available. Retrying in ${waitSeconds} seconds... (Attempt ${attempt}/${maxRetries})"
-                sleep(time: waitSeconds, unit: 'SECONDS')
-            }
-        }
-    }
-}
-
 pipeline {
     agent any
 
     environment {
-        SELENIUM_GRID_HOST = "http://selenium-hub:4444/status"
+        SUITE = "login"
+        BROWSER = "chrome"
+        WORKERS = "2"
     }
 
     parameters {
         choice(
             name: 'SUITE',
-            choices: ['AddToCartRunner', 'LoginRunner', 'RegisterRunner', 'AllTestRunner'],
+            choices: ['login', 'register', 'add-to-cart', 'all-tests'],
             description: 'Select the test suite to run'
         )
         choice(
             name: 'BROWSER',
-            choices: ['Chrome', 'Edge', 'Firefox'],
+            choices: ['chrome', 'edge', 'firefox'],
             description: 'Select the browser for test execution'
+        )
+        string(
+            name: 'WORKERS',
+            defaultValue: '1',
+            description: 'Number of parallel processes to run tests'
+        )
+
+        booleanParam(
+            name: 'COVERAGE',
+            defaultValue: false,
+            description: 'Enable or disable code coverage reporting'
         )
     }
 
     stages {
-        stage('Run Serenity Tests in Docker') {
+        stage('Run Playwright Tests in Docker') {
             steps {
                 script {
-                    def browser = params.BROWSER.toLowerCase()
-                    def suite = params.SUITE
-                    def gradleCommand = ''
+                    echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
+                    def playwrightCommand = ''
 
-                    echo "Running Serenity tests for suite: ${suite} on browser: ${params.BROWSER}"
-                    gradleCommand = 'gradle :test --tests "us.opencart.runners.' + suite + '" -Denvironment=remote' + params.BROWSER + ' --info'
+                    if (params.SUITE == 'all-tests' && !params.COVERAGE) {
+                        playwrightCommand = 'npm run test:all'
+                    } else if (params.SUITE != 'all-tests' && params.COVERAGE) {
+                        playwrightCommand = 'npm run coverage'
+                    } else if (params.SUITE != 'all-tests' && !params.COVERAGE) {
+                        playwrightCommand = 'npm run test'
+                    }
+
+                    env.SUITE = params.SUITE
+                    env.BROWSER = params.BROWSER
+                    env.WORKERS = params.WORKERS
+
                     sh """
-                        docker-compose -f docker-compose.selenium.yml up -d selenium-hub ${browser}-node
-                        gradle clean cleanTest compileTestJava --no-build-cache --refresh-dependencies
-                        rm -rf target/site
-                        rm -rf .serenity
-                    """
-                    waitForSeleniumGridUp(env.SELENIUM_GRID_HOST, 3, 10)
-                    sh """
-                        ${gradleCommand}
+                        docker-compose -f docker-compose.yml run --rm \
+                            -e SUITE=${env.SUITE} \
+                            -e BROWSER=${env.BROWSER} \
+                            -e WORKERS=${env.WORKERS} \
+                            playwright ${playwrightCommand}
                     """
                 }
             }
@@ -72,25 +64,24 @@ pipeline {
 
     post {
         success {
-            echo 'Tests executed successfully. Serenity report is available.'
+            echo 'Tests executed successfully. Playwright report is available.'
         }
         failure {
             echo 'Tests failed. Please check the execution logs and generated report.'
         }
         always {
-            script{
-                sh """
-                    gradle aggregate
-                    docker-compose -f docker-compose.selenium.yml down
-                """
-                echo 'Store Serenity Reports'
+            script {
+                // Use the same docker-compose file as in run
+                sh "docker-compose -f docker-compose.yml down"
+
+                echo 'Store Playwright Reports'
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
-                    reportDir: './target/site/serenity',
+                    reportDir: './playwright-report/',
                     reportFiles: 'index.html',
-                    reportName: "${params.SUITE}-Serenity-Report"
+                    reportName: "${params.SUITE}-Playwright-Report"
                 ])
                 echo 'Pipeline execution finished.'
             }

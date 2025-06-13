@@ -6,16 +6,18 @@ pipeline {
         }
 
     stages {
-        stage('Run Serenity Suite') {
+        stage('Run Playwright Suite') {
             steps {
                 script {
-                    echo "Run all Tests of suite in Serenity"
+                    echo "Run all Tests of suite in Playwright"
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                         build(
-                            job: 'Run-Suite-YourStore-SerenityBdd-Screenplay-TestLab',
+                            job: 'Run-Suite-YourStore-Playwright-TestLab',
                             parameters: [
-                                string(name: 'SUITE', value: 'AllTestRunner'),
-                                string(name: 'BROWSER', value: 'Chrome')
+                                string(name: 'SUITE', value: 'all-tests'),
+                                string(name: 'BROWSER', value: 'chrome'),
+                                string(name: 'WORKERS', value: '1'),
+                                string(name: 'COVERAGE', value: 'false')
                             ]
                         )
                     }
@@ -26,7 +28,7 @@ pipeline {
         stage('Run SonarQube Scan') {
             steps {
                 script {
-                    def currentDir = "${WORKSPACE_PATH}/Run-Suite-YourStore-SerenityBdd-Screenplay-TestLab"
+                    def currentDir = "${WORKSPACE_PATH}/Run-Suite-YourStore-Playwright-TestLab"
                     dir(currentDir){
                         echo "Run SonarQube scan in: ${currentDir} where the tests have executed."
                         build(
