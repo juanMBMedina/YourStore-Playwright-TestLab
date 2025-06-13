@@ -2,9 +2,6 @@ pipeline {
     agent any
 
     environment {
-        SUITE = "login"
-        BROWSER = "chrome"
-        WORKERS = "2"
         TEMP_DIR = "/var/jenkins_home/temp/playwright"
     }
 
