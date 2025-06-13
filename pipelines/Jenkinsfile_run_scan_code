@@ -17,7 +17,7 @@ pipeline {
                                 string(name: 'SUITE', value: 'all-tests'),
                                 string(name: 'BROWSER', value: 'chrome'),
                                 string(name: 'WORKERS', value: '1'),
-                                string(name: 'COVERAGE', value: 'false')
+                                booleanParam(name: 'COVERAGE', defaultValue: false)
                             ]
                         )
                     }

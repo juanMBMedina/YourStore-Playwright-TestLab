@@ -7,7 +7,8 @@ services:
       dockerfile: ./dockerfiles/Dockerfile.playwright
     working_dir: /app
     volumes:
-      - .:/app
+      - ${PWD}/:playwright_src
+      - playwright_src:/app
     environment:
       SUITE: ${SUITE:-login}
       BROWSER: ${BROWSER:-chrome}
@@ -18,3 +19,7 @@ services:
 networks:
   project-network:
     external: true
+
+volumes:
+  playwright_src:
+    name: playwright_src 
