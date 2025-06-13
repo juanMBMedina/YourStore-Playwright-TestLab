@@ -62,7 +62,7 @@ pipeline {
 
                     script {
                         echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
-                        sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright-entrypoint.sh"
+                        sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright"
                     }
                 }
             }
