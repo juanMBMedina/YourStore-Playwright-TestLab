@@ -34,10 +34,22 @@ pipeline {
 
     stages {
 
+        stage('Setting environment') {
+            steps {
+                script {
+                    echo "Setting environment variables"
+                    env.ORIGINAL_DIR = env.WORKSPACE // Save the original directory
+                    env.SUITE = params.SUITE
+                    env.BROWSER = params.BROWSER
+                    env.WORKERS = params.WORKERS
+                }
+            }
+        }
+
         stage('Prepare files in temporal directory') {
            steps {
                 script {
-                    env.ORIGINAL_DIR = env.WORKSPACE // Save the original directory
+                    
                     echo "Preparing files in temporary directory: ${env.TEMP_DIR}"
                     sh """
                         mkdir -p ${env.TEMP_DIR}
@@ -86,8 +98,8 @@ pipeline {
                     dir("${env.TEMP_DIR}") {
                         echo "Copying report folder back to original directory"
                         sh """
-                            cp -r ${env.TEMP_DI}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report
-                            echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report"
+                            cp -r ${env.TEMP_DIR}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report/
+                            echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report/
                         """
                     }
                 }
