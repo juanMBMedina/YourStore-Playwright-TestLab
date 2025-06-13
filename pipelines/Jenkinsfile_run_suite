@@ -53,7 +53,9 @@ pipeline {
                     sh """
                         echo "Current directory contents (Jenkins):" && ls -ltr && \
                         echo "Current directory contents (Docker - playwright):" && \
-                        docker-compose -f docker-compose.playwright.yml run --rm playwright ls -la
+                        docker-compose -f docker-compose.playwright.yml run --rm playwright ls -la && \
+                        docker-compose -f docker-compose.playwright.yml run --rm playwright ls -la /app
+
                     """    
                     sh """
                         docker-compose -f docker-compose.playwright.yml run --rm \
