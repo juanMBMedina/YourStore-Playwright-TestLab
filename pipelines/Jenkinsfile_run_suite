@@ -44,9 +44,8 @@ pipeline {
         }
 
         stage('Prepare files in temporal directory') {
-           steps {
+            steps {
                 script {
-                    
                     echo "Preparing files in temporary directory: ${env.TEMP_DIR}"
                     sh """
                         mkdir -p ${env.TEMP_DIR}
@@ -92,7 +91,7 @@ pipeline {
                         echo "Copying report folder back to original directory"
                         sh """
                             cp -r ${env.TEMP_DIR}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report/
-                            echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report/
+                            echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report/"
                         """
                     }
                 }
