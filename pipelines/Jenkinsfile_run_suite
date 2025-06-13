@@ -85,7 +85,8 @@ pipeline {
                 script {
                     echo "Copying report folder back to original directory"
                     sh """
-                        cp -r ${env.TEMP_DIR}/playwright-report ./
+                        cp -r ${env.TEMP_DIR}/playwright-report ${env.ORIGINAL_DIR}/playwright-report
+                        echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report"
                     """
                 }
             }
@@ -95,7 +96,7 @@ pipeline {
             steps {
                 script {
                     echo 'Publishing Playwright Reports'
-                    dir(env.ORIGINAL_DIR) { // Change directory using dir()
+                    dir(env.ORIGINAL_DIR) {
                         publishHTML(target: [
                             allowMissing: false,
                             alwaysLinkToLastBuild: true,
