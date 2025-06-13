@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./dockerfiles/Dockerfile.playwright
     working_dir: /app
-    entrypoint: ["sh", "-c", "npm install && npm run test"]
+    entrypoint: ["sh", "-c", "npm install && ./playwright-entrypoint.sh"]
     volumes:
       - playwright_src:/app
     environment:

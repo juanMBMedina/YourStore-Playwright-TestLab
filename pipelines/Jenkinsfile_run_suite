@@ -62,23 +62,7 @@ pipeline {
 
                     script {
                         echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
-                        def playwrightCommand = ''
-
-                        if (env.COVERAGE) {
-                            playwrightCommand = 'npm run coverage'
-                        } else if (env.SUITE == 'all-tests') {
-                            playwrightCommand = 'npm run test:all'
-                        } else {
-                            playwrightCommand = 'npm run test'
-                        }
-
-                        sh """
-                            docker-compose -f docker-compose.playwright.yml run --rm \
-                                -e SUITE=${env.SUITE} \
-                                -e BROWSER=${env.BROWSER} \
-                                -e WORKERS=${env.WORKERS} \
-                                playwright
-                        """
+                        sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright-entrypoint.sh"
                     }
                 }
             }
