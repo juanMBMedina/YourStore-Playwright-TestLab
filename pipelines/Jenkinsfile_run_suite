@@ -50,6 +50,7 @@ pipeline {
                     sh """
                         mkdir -p ${env.TEMP_DIR}
                         cp -r ./* ${env.TEMP_DIR}/
+                        chmod -R 775 ${env.TEMP_DIR}
                     """
                 }
             }
