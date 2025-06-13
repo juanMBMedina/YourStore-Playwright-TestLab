@@ -47,14 +47,16 @@ cd YourStore-Playwright-TestLab
 
 To run tests with a specific browser (e.g., Edge) and remote mode, remote mode have the parameter headless by default, see package.json:
 ```bash
-npm run test
-"npm run test " -> playwright test tests/${SUITE:-login}.spec.ts --project=${BROWSER:-chromium}
+export BORWSER=chrome && export SUITE=login && export WORKERS=1 && npm run test
+export BORWSER=firefox && export SUITE=register && export WORKERS=1 && npm run test
+export BORWSER=edge && export SUITE=add-to-cart && export WORKERS=1 && npm run test
 ```
 
 Or set the environment variable before running:
 ```bash
 export SUITE=login
 export BROWSER=chrome
+export WORKERS=1
 ```
 Run sonar-scanner in Local Environment:
 ```bash

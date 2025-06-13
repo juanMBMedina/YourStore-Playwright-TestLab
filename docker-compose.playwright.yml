@@ -11,6 +11,7 @@ services:
     environment:
       SUITE: ${SUITE:-login}
       BROWSER: ${BROWSER:-chrome}
+      WORKERS: ${WORKERS:-1}
     networks:
       - project-network
 
