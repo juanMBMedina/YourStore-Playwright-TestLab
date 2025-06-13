@@ -38,11 +38,11 @@ pipeline {
                     echo "Running Playwright tests for suite: ${params.SUITE} on browser: ${params.BROWSER}"
                     def playwrightCommand = ''
 
-                    if (params.SUITE == 'all-tests' && !params.COVERAGE) {
-                        playwrightCommand = 'npm run test:all'
-                    } else if (params.SUITE != 'all-tests' && params.COVERAGE) {
+                    if (params.COVERAGE) {
                         playwrightCommand = 'npm run coverage'
-                    } else if (params.SUITE != 'all-tests' && !params.COVERAGE) {
+                    } else if (params.SUITE == 'all-tests') {
+                        playwrightCommand = 'npm run test:all'
+                    } else {
                         playwrightCommand = 'npm run test'
                     }
 
@@ -71,7 +71,6 @@ pipeline {
         }
         always {
             script {
-
                 echo 'Store Playwright Reports'
                 publishHTML(target: [
                     allowMissing: false,
