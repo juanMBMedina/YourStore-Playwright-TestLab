@@ -10,9 +10,9 @@ services:
     volumes:
       - playwright_src:/app
     environment:
-      SUITE: ${SUITE:-login}
-      BROWSER: ${BROWSER:-chrome}
-      WORKERS: ${WORKERS:-1}
+      SUITE: ${SUITE}
+      BROWSER: ${BROWSER}
+      WORKERS: ${WORKERS}
     networks:
       - project-network
 
