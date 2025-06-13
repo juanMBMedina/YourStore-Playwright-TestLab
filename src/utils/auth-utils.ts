@@ -1,5 +1,3 @@
-import { UserLogin } from "../models/UserLogin";
-import { AccountPage } from "../pages/Account";
 import { HomePage } from "../pages/Home";
 import { LoginPage } from "../pages/Login";
 import { RegisterPage } from "../pages/Register";

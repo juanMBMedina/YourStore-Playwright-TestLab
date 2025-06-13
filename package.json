@@ -4,8 +4,9 @@
   "description": "This repository contains the implementation of an automated testing plan developed using Playwright POM. The project was created as part of the automation course offered by Academia QA and adapted for use with the Your Store demo application.",
   "main": "index.js",
   "scripts": {
-    "coverage": "npx nyc --reporter=lcov --reporter=text-summary npm run test:suite",
     "analyze": "npm run coverage",
+    "coverage": "npx nyc --reporter=lcov --reporter=text-summary npm run test:coverage",
+    "test:coverage": "playwright test --project=edge",
     "test": "playwright test tests/${SUITE:-login}.spec.ts --project=${BROWSER:-chromium}",
     "test:login-suite": "playwright test tests/login.spec.ts",
     "test:register-suite": "playwright test tests/register.spec.ts",
