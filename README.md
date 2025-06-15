@@ -81,7 +81,7 @@ To run with custom VM options in IntelliJ:
 
 After execution, Playwright generates detailed HTML reports. Find them in:
 ```
-/reports/
+/playwright-report/
 ```
 
 ## Contributing
