@@ -45,22 +45,30 @@ git clone git@github.com:juanMBMedina/YourStore-Playwright-TestLab.git
 cd YourStore-Playwright-TestLab
 ```
 
-To run tests with a specific browser (e.g., Edge) and remote mode, remote mode have the parameter headless by default, see package.json:
-```bash
-export BORWSER=chrome && export SUITE=login && export WORKERS=1 && npm run test
-export BORWSER=firefox && export SUITE=register && export WORKERS=1 && npm run test
-export BORWSER=edge && export SUITE=add-to-cart && export WORKERS=1 && npm run test
+## Running Playwright Tests with Environment Variables
+
+You can configure and run Playwright tests using environment variables defined in a `.env` file.
+
+---
+
+## Create a `.env` file
+
+Create a `.env` file in the root of your project with the following content:
+
+```env
+SUITE=login
+BROWSER=chrome
+WORKERS=1
 ```
 
-Or set the environment variable before running:
+## Run with .env file
 ```bash
-export SUITE=login
-export BROWSER=chrome
-export WORKERS=1
+npx dotenv -e .env -- npm run test
 ```
-Run sonar-scanner in Local Environment:
+
+## Run sonar-scanner in Local Environment:
 ```bash
-sonar-scanner.bat -D"sonar.login=%SONAR_TOKEN%" -D"project.settings=sonar-scanner.properties" -D"sonar.projectBaseDir=."
+sonar-scanner.bat -D"sonar.login=%SONAR_TOKEN%" -D"project.settings=sonar-scanner.properties" -D"sonar.projectBaseDir=.
 ```
 
 ## Running in VS Code

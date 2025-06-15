@@ -23,8 +23,8 @@ export class UserRegister {
   
 
   constructor(data?: UserRegisterData) {
-    this.firstName = data?.firstName !== undefined ? data.firstName : faker.name.firstName();
-    this.lastName = data?.lastName !== undefined ? data.lastName : faker.name.lastName();
+    this.firstName = data?.firstName !== undefined ? data.firstName : faker.person.firstName();
+    this.lastName = data?.lastName !== undefined ? data.lastName : faker.person.lastName();
     this.email = data?.email !== undefined ? data.email : faker.internet.email();
     this.telephone = data?.telephone !== undefined ? data.telephone : faker.phone.number().replace(/\D/g, '');
     this.password = data?.password !== undefined ? data.password : faker.internet.password();
