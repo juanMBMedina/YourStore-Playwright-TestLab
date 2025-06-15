@@ -1,70 +1,111 @@
-def waitForSeleniumGridUp(String url = "http://selenium-hub:4444/status", int maxRetries = 3, int waitSeconds = 5) {
-    int attempt = 0
-    while (attempt < maxRetries) {
-        try {
-            def response = sh(
-                script: "curl -s -o /dev/null -w \"%{http_code}\" ${url}",
-                returnStdout: true
-            ).trim()
-
-            if (response == "200") {
-                echo "✅ Selenium Grid is up (HTTP ${response})"
-                return true
-            } else {
-                throw new Exception("Unexpected response code: ${response}")
-            }
-        } catch (Exception e) {
-            attempt++
-            if (attempt >= maxRetries) {
-                error "❌ Selenium Grid is not available after ${maxRetries} attempts. Last response: ${e.message}"
-            } else {
-                echo "⏳ Selenium Grid not available. Retrying in ${waitSeconds} seconds... (Attempt ${attempt}/${maxRetries})"
-                sleep(time: waitSeconds, unit: 'SECONDS')
-            }
-        }
-    }
-}
-
 pipeline {
     agent any
 
     environment {
-        SELENIUM_GRID_HOST = "http://selenium-hub:4444/status"
+        TEMP_DIR = "/var/jenkins_home/temp/playwright"
     }
 
     parameters {
         choice(
             name: 'SUITE',
-            choices: ['AddToCartRunner', 'LoginRunner', 'RegisterRunner', 'AllTestRunner'],
+            choices: ['login', 'register', 'add-to-cart', 'all-tests'],
             description: 'Select the test suite to run'
         )
         choice(
             name: 'BROWSER',
-            choices: ['Chrome', 'Edge', 'Firefox'],
+            choices: ['chrome', 'edge', 'firefox'],
             description: 'Select the browser for test execution'
+        )
+        string(
+            name: 'WORKERS',
+            defaultValue: '1',
+            description: 'Number of parallel processes to run tests'
+        )
+
+        booleanParam(
+            name: 'COVERAGE',
+            defaultValue: false,
+            description: 'Enable or disable code coverage reporting'
         )
     }
 
     stages {
-        stage('Run Serenity Tests in Docker') {
+
+        stage('Setting environment') {
             steps {
                 script {
-                    def browser = params.BROWSER.toLowerCase()
-                    def suite = params.SUITE
-                    def gradleCommand = ''
+                    echo "Setting environment variables"
+                    env.ORIGINAL_DIR = env.WORKSPACE // Save the original directory
+                    env.SUITE = params.SUITE
+                    env.BROWSER = params.BROWSER
+                    env.WORKERS = params.WORKERS
+                }
+            }
+        }
 
-                    echo "Running Serenity tests for suite: ${suite} on browser: ${params.BROWSER}"
-                    gradleCommand = 'gradle :test --tests "us.opencart.runners.' + suite + '" -Denvironment=remote' + params.BROWSER + ' --info'
+        stage('Prepare files in temporal directory') {
+            steps {
+                script {
+                    echo "Preparing files in temporary directory: ${env.TEMP_DIR}"
                     sh """
-                        docker-compose -f docker-compose.selenium.yml up -d selenium-hub ${browser}-node
-                        gradle clean cleanTest compileTestJava --no-build-cache --refresh-dependencies
-                        rm -rf target/site
-                        rm -rf .serenity
+                        mkdir -p ${env.TEMP_DIR}
+                        cp -r ./* ${env.TEMP_DIR}/
+                        chmod -R 775 ${env.TEMP_DIR}
                     """
-                    waitForSeleniumGridUp(env.SELENIUM_GRID_HOST, 3, 10)
-                    sh """
-                        ${gradleCommand}
-                    """
+                }
+            }
+        }
+
+        stage('Run Playwright Tests in Docker') {
+            steps {
+                dir("${env.TEMP_DIR}") {
+                    echo "Changed directory to: ${env.TEMP_DIR}"
+
+                    script {
+                        echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
+                        sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright"
+                    }
+                }
+            }
+        }
+
+        stage('Copy report folder to original directory') {
+            steps {
+                script {
+                    dir("${env.TEMP_DIR}") {
+                        echo "Copying report folder back to original directory"
+                        sh """
+                            cp -r ${env.TEMP_DIR}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report/
+                            echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report/"
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Publish report') {
+            steps {
+                script {
+                    echo 'Publishing Playwright Reports'
+                    dir(env.ORIGINAL_DIR) {
+                        publishHTML(target: [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: './playwright-report/',
+                            reportFiles: 'index.html',
+                            reportName: "${params.SUITE}-Playwright-Report"
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('Clean temporal directory') {
+            steps {
+                script {
+                    echo "Cleaning up temporary directory: ${env.TEMP_DIR}, excluding node_modules folder"
+                    sh "find ${env.TEMP_DIR} -mindepth 1 -not -name 'node_modules' -exec rm -rf {} +"
                 }
             }
         }
@@ -72,28 +113,13 @@ pipeline {
 
     post {
         success {
-            echo 'Tests executed successfully. Serenity report is available.'
+            echo 'Pipeline executed successfully.'
         }
         failure {
-            echo 'Tests failed. Please check the execution logs and generated report.'
+            echo 'Pipeline failed. Please check the logs.'
         }
         always {
-            script{
-                sh """
-                    gradle aggregate
-                    docker-compose -f docker-compose.selenium.yml down
-                """
-                echo 'Store Serenity Reports'
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: './target/site/serenity',
-                    reportFiles: 'index.html',
-                    reportName: "${params.SUITE}-Serenity-Report"
-                ])
-                echo 'Pipeline execution finished.'
-            }
+            echo 'Pipeline execution finished.'
         }
     }
 }
