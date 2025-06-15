@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from "@playwright/test";
+import { Page, expect } from "@playwright/test";
 import { ItemsTable } from "../components/ItemsTable";
 import { ItemBox } from "../components/ItemBox";
 import { NavBarCategory } from "../components/NavBarCategory";
@@ -19,7 +19,6 @@ export class HomePage {
   ) => `Success: You have added ${productName} to your product comparison!`;
   protected readonly successMessageLocator = "#content h1";
   protected readonly successMessageTextLocator = "#content p:first-of-type";
-  protected readonly successAlert: Locator;
   private readonly itemsTable: ItemsTable;
   private readonly itemBox: ItemBox;
   private readonly navBarCategory: NavBarCategory;
@@ -67,7 +66,7 @@ export class HomePage {
         attempts++;
         if (attempts >= maxAttempts) {
           throw new Error(
-            `Failed to match URL after ${maxAttempts} attempts: ${error.message}`
+            `Failed to match URL after ${maxAttempts} attempts: ${(error instanceof Error ? error.message : String(error))}`
           );
         }
       }

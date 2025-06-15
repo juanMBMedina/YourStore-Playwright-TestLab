@@ -1,4 +1,4 @@
-import { Locator, expect } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 import { HomePage } from "./Home";
 import { UserLogin } from "../models/UserLogin";
 
@@ -12,7 +12,7 @@ export class LoginPage extends HomePage {
   static LOGIN_ERROR_ATTMPTS_MESSAGE =
     "Warning: Your account has exceeded allowed number of login attempts. Please try again in 1 hour.";
 
-  constructor(page) {
+  constructor(page: Page) {
     super(page);
     this.emailInput = page.locator("#input-email");
     this.passwordInput = page.locator("#input-password");
