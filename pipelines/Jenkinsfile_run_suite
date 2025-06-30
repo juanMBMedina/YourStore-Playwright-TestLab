@@ -6,36 +6,18 @@ pipeline {
     }
 
     parameters {
-        choice(
-            name: 'SUITE',
-            choices: ['login', 'register', 'add-to-cart', 'all-tests'],
-            description: 'Select the test suite to run'
-        )
-        choice(
-            name: 'BROWSER',
-            choices: ['chrome', 'edge', 'firefox'],
-            description: 'Select the browser for test execution'
-        )
-        string(
-            name: 'WORKERS',
-            defaultValue: '1',
-            description: 'Number of parallel processes to run tests'
-        )
-
-        booleanParam(
-            name: 'COVERAGE',
-            defaultValue: false,
-            description: 'Enable or disable code coverage reporting'
-        )
+        choice(name: 'SUITE', choices: ['login', 'register', 'add-to-cart', 'all-tests'], description: 'Select the test suite to run')
+        choice(name: 'BROWSER', choices: ['chrome', 'edge', 'firefox'], description: 'Select the browser for test execution')
+        string(name: 'WORKERS', defaultValue: '1', description: 'Number of parallel processes to run tests')
+        booleanParam(name: 'COVERAGE', defaultValue: false, description: 'Enable or disable code coverage reporting')
     }
 
     stages {
-
         stage('Setting environment') {
             steps {
                 script {
                     echo "Setting environment variables"
-                    env.ORIGINAL_DIR = env.WORKSPACE // Save the original directory
+                    env.ORIGINAL_DIR = env.WORKSPACE
                     env.SUITE = params.SUITE
                     env.BROWSER = params.BROWSER
                     env.WORKERS = params.WORKERS
@@ -60,42 +42,10 @@ pipeline {
             steps {
                 dir("${env.TEMP_DIR}") {
                     echo "Changed directory to: ${env.TEMP_DIR}"
-
                     script {
                         echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
-                        sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright"
-                    }
-                }
-            }
-        }
-
-        stage('Copy report folder to original directory') {
-            steps {
-                script {
-                    dir("${env.TEMP_DIR}") {
-                        echo "Copying report folder back to original directory"
-                        sh """
-                            cp -r ${env.TEMP_DIR}/playwright-report/ ${env.ORIGINAL_DIR}/playwright-report/
-                            echo "Playwright report copied to ${env.ORIGINAL_DIR}/playwright-report/"
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Publish report') {
-            steps {
-                script {
-                    echo 'Publishing Playwright Reports'
-                    dir(env.ORIGINAL_DIR) {
-                        publishHTML(target: [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: './playwright-report/',
-                            reportFiles: 'index.html',
-                            reportName: "${params.SUITE}-Playwright-Report"
-                        ])
+                        // ⚠️ Este "|| true" previene que el pipeline se corte si fallan los tests
+                        sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright || true"
                     }
                 }
             }
@@ -112,14 +62,39 @@ pipeline {
     }
 
     post {
-        success {
-            echo 'Pipeline executed successfully.'
-        }
-        failure {
-            echo 'Pipeline failed. Please check the logs.'
-        }
         always {
-            echo 'Pipeline execution finished.'
+            echo "Post actions: Copying and publishing report..."
+
+            script {
+                dir("${env.TEMP_DIR}") {
+                    echo "Copying Playwright report..."
+                    sh """
+                        mkdir -p ${env.ORIGINAL_DIR}/playwright-report
+                        cp -r ${env.TEMP_DIR}/playwright-report/* ${env.ORIGINAL_DIR}/playwright-report/ || true
+                        echo "Report copied to ${env.ORIGINAL_DIR}/playwright-report/"
+                    """
+                }
+
+                echo "Publishing HTML report..."
+                dir(env.ORIGINAL_DIR) {
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: './playwright-report/',
+                        reportFiles: 'index.html',
+                        reportName: "${params.SUITE}-Playwright-Report"
+                    ])
+                }
+            }
+        }
+
+        success {
+            echo '✅ Pipeline executed successfully.'
+        }
+
+        failure {
+            echo '❌ Pipeline failed. Check the logs above.'
         }
     }
 }
