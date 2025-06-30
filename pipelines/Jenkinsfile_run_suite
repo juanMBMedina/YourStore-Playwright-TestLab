@@ -58,13 +58,15 @@ pipeline {
             script {
                 dir("${env.TEMP_DIR}") {
                     echo "Moving Playwright report..."
+
                     sh """
-                        if [ -d "${env.TEMP_DIR}/playwright-report" ]; then
-                            mkdir -p ${env.ORIGINAL_DIR}/playwright-report
-                            mv ${env.TEMP_DIR}/playwright-report ${env.ORIGINAL_DIR}/
-                            echo "Report moved to ${env.ORIGINAL_DIR}/playwright-report"
+                        if [ -d "playwright-report" ]; then
+                            echo "Playwright report found. Moving to workspace..."
+                            rm -rf ${env.ORIGINAL_DIR}/playwright-report
+                            mv playwright-report ${env.ORIGINAL_DIR}/
+                            echo "✅ Report moved to ${env.ORIGINAL_DIR}/playwright-report"
                         else
-                            echo "playwright-report folder not found in ${env.TEMP_DIR}"
+                            echo "⚠️ Playwright report folder not found in ${env.TEMP_DIR}"
                         fi
                     """
                 }
