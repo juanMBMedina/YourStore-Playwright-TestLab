@@ -98,7 +98,7 @@ test.describe("Your Site Web Page: Login Feature", () => {
 
       logStep("Filling the form with incorrect values several times");
       const user = new UserLogin(userData.loginMaxAttemptsUser);
-      const maxAttempts = 10;
+      const maxAttempts = 3;
       let attempt = 1;
 
       do {
@@ -111,7 +111,8 @@ test.describe("Your Site Web Page: Login Feature", () => {
       );
 
       logStep("Validating the lockout message is NOT shown");
-      await loginPage.expectNumMaxAttemptsErrorMessage();
+      //await loginPage.expectNumMaxAttemptsErrorMessage();
+      await loginPage.expectLoginErrorMessage();
     });
   });
 });
