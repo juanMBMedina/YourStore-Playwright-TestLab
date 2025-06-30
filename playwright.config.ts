@@ -23,8 +23,8 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ["html"],
-    ["allure-playwright"],
+    ["html", { open: "never" }],
+    ["allure-playwright"]
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -50,7 +50,7 @@ export default defineConfig({
         launchOptions: { args: ["--start-maximized"] },
       },
     },
-  
+
     {
       name: "edge",
       use: {
@@ -69,7 +69,7 @@ export default defineConfig({
         deviceScaleFactor: undefined,
       },
     },
-   
+
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',

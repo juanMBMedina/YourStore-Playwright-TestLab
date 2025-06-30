@@ -4,13 +4,13 @@ import { LoginPage } from "../src/pages/Login";
 import { UserLogin } from "../src/models/UserLogin";
 import userData from "../resources/files/dataLoginFeature.json";
 import { AccountPage } from "../src/pages/Account";
-import { goToLogin, logStep } from '../src/utils/auth-utils';
-
-let homePage: HomePage;
-let loginPage: LoginPage;
-let accountPage: AccountPage;
+import { goToLogin, logStep } from "../src/utils/auth-utils";
 
 test.describe("Your Site Web Page: Login Feature", () => {
+  let homePage: HomePage;
+  let loginPage: LoginPage;
+  let accountPage: AccountPage;
+
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
@@ -18,7 +18,9 @@ test.describe("Your Site Web Page: Login Feature", () => {
   });
 
   test.describe("YS-5: Valid login", () => {
-    test("Should login successfully with valid user credentials", async ({ page }) => {
+    test("Should login successfully with valid user credentials", async ({
+      page,
+    }) => {
       await goToLogin(homePage, loginPage);
 
       logStep("Instantiating valid user data");
@@ -50,7 +52,9 @@ test.describe("Your Site Web Page: Login Feature", () => {
 
   test.describe("YS-7: Empty fields in login form", () => {
     for (const scenario of userData.scenarios) {
-      test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({ page }) => {
+      test(`Should show an alert when login form is submitted with ${scenario.description}`, async ({
+        page,
+      }) => {
         await goToLogin(homePage, loginPage);
 
         logStep(`Submitting the login form with: ${scenario.description}`);
@@ -63,7 +67,9 @@ test.describe("Your Site Web Page: Login Feature", () => {
   });
 
   test.describe("YS-8: Logout functionality", () => {
-    test("Should logout successfully and return to the home page", async ({ page }) => {
+    test("Should logout successfully and return to the home page", async ({
+      page,
+    }) => {
       await goToLogin(homePage, loginPage);
 
       logStep("Instantiating valid user data");
@@ -85,7 +91,9 @@ test.describe("Your Site Web Page: Login Feature", () => {
   });
 
   test.describe("YS-14: Max login attempts not reached", () => {
-    test("Should validate that lockout message is NOT shown before reaching max attempts", async ({ page }) => {
+    test("Should validate that lockout message is NOT shown before reaching max attempts", async ({
+      page,
+    }) => {
       await goToLogin(homePage, loginPage);
 
       logStep("Filling the form with incorrect values several times");
