@@ -38,10 +38,8 @@ export class HomePage {
   }
 
   async goto() {
-    await this.page.goto(
-      "https://opencart.abstracta.us/index.php?route=common/home",
-      { waitUntil: "load" }
-    );
+    const baseUrl = process.env.BASE_URL || "https://opencart.abstracta.us/index.php?route=common/home";
+    await this.page.goto(baseUrl, { waitUntil: "load" });
   }
 
   async gotoLoginPage() {
