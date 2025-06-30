@@ -5,10 +5,11 @@ import { HomePage } from '../src/pages/Home';
 import * as data from '../resources/files/dataRegisterFeature.json';
 import { goToRegister, logStep } from '../src/utils/auth-utils';
 
-let homePage: HomePage;
-let registerPage: RegisterPage;
+
 
 test.describe('Your Site Web Page: Register User Feature', () => {
+  let homePage: HomePage;
+  let registerPage: RegisterPage;
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     registerPage = new RegisterPage(page);

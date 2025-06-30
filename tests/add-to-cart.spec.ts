@@ -8,10 +8,6 @@ import { Product } from "../src/models/Product";
 import userData from "../resources/files/dataLoginFeature.json";
 import dataAddToCartFeature from "../resources/files/dataAddToCartFeature.json";
 
-let homePage: HomePage;
-let loginPage: LoginPage;
-let accountPage: AccountPage;
-
 async function searchProduct(homePage: HomePage, product: Product) {
   logStep(`Search and navigate to category containing ${product.name}`);
   await homePage.selectNavbarCategory(product.category, product.subcategory);
@@ -50,6 +46,10 @@ async function setupWhisList(homePage: HomePage, product: Product) {
 }
 
 test.describe("Your Site Web Page: Add to Cart Feature", () => {
+  let homePage: HomePage;
+  let loginPage: LoginPage;
+  let accountPage: AccountPage;
+  
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
@@ -78,13 +78,16 @@ test.describe("Your Site Web Page: Add to Cart Feature", () => {
     await homePage.validateComparisonSuccess(product.name);
   });
 
-
-  test("YS-10: Validate the selection of a favorite product", async ({ page }) => {
+  test("YS-10: Validate the selection of a favorite product", async ({
+    page,
+  }) => {
     const product = new Product(dataAddToCartFeature.wishListItem);
     await setupWhisList(homePage, product);
   });
 
-  test("YS-11: Validate the removal of a favorite product", async ({ page }) => {
+  test("YS-11: Validate the removal of a favorite product", async ({
+    page,
+  }) => {
     const product = new Product(dataAddToCartFeature.wishListItem);
     await setupWhisList(homePage, product);
 
@@ -114,5 +117,4 @@ test.describe("Your Site Web Page: Add to Cart Feature", () => {
     logStep(`Validate ${product.name} is removed from shopping cart`);
     await homePage.validateItemRemovedFromTable(product.name);
   });
-
 });
