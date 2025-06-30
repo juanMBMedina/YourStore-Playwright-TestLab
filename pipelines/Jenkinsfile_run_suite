@@ -44,7 +44,6 @@ pipeline {
                     echo "Changed directory to: ${env.TEMP_DIR}"
                     script {
                         echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
-                        // ⚠️ Este "|| true" previene que el pipeline se corte si fallan los tests
                         sh "docker-compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright || true"
                     }
                 }
@@ -67,11 +66,15 @@ pipeline {
 
             script {
                 dir("${env.TEMP_DIR}") {
-                    echo "Copying Playwright report..."
+                    echo "Moving Playwright report..."
                     sh """
-                        mkdir -p ${env.ORIGINAL_DIR}/playwright-report
-                        cp -r ${env.TEMP_DIR}/playwright-report/* ${env.ORIGINAL_DIR}/playwright-report/ || true
-                        echo "Report copied to ${env.ORIGINAL_DIR}/playwright-report/"
+                        if [ -d "${env.TEMP_DIR}/playwright-report" ]; then
+                            mkdir -p ${env.ORIGINAL_DIR}/playwright-report
+                            mv ${env.TEMP_DIR}/playwright-report ${env.ORIGINAL_DIR}/
+                            echo "Report moved to ${env.ORIGINAL_DIR}/playwright-report"
+                        else
+                            echo "playwright-report folder not found in ${env.TEMP_DIR}"
+                        fi
                     """
                 }
 
