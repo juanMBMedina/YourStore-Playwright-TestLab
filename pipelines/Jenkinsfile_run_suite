@@ -49,15 +49,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Clean temporal directory') {
-            steps {
-                script {
-                    echo "Cleaning up temporary directory: ${env.TEMP_DIR}, excluding node_modules folder"
-                    sh "find ${env.TEMP_DIR} -mindepth 1 -not -name 'node_modules' -exec rm -rf {} +"
-                }
-            }
-        }
     }
 
     post {
@@ -89,6 +80,11 @@ pipeline {
                         reportName: "${params.SUITE}-Playwright-Report"
                     ])
                 }
+            }
+
+            script {
+                echo "Cleaning up temporary directory: ${env.TEMP_DIR}, excluding node_modules folder"
+                sh "find ${env.TEMP_DIR} -mindepth 1 -not -name 'node_modules' -exec rm -rf {} +"
             }
         }
 
