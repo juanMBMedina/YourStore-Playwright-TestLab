@@ -49,7 +49,7 @@ test.describe("Your Site Web Page: Add to Cart Feature", () => {
   let homePage: HomePage;
   let loginPage: LoginPage;
   let accountPage: AccountPage;
-  
+
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
