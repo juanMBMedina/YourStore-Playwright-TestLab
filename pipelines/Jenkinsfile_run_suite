@@ -21,6 +21,7 @@ pipeline {
                     env.SUITE = params.SUITE
                     env.BROWSER = params.BROWSER
                     env.WORKERS = params.WORKERS
+                    env.HEADLESS = true
                 }
             }
         }
@@ -42,7 +43,6 @@ pipeline {
             steps {
                 dir("${env.TEMP_DIR}") {
                     echo "Changed directory to: ${env.TEMP_DIR}"
-                    env.HEADLESS = true
                     script {
                         echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER} in mode headless=${env.HEADLESS} with ${env.WORKERS} workers. Coverage: ${params.COVERAGE}"
                         sh """
