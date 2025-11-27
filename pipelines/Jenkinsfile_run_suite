@@ -44,7 +44,15 @@ pipeline {
                     echo "Changed directory to: ${env.TEMP_DIR}"
                     script {
                         echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
-                        sh "docker compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright || true"
+                        sh """
+                            docker compose -f docker-compose.playwright.yml run --rm \
+                                -e SUITE=${env.SUITE} \
+                                -e BROWSER=${env.BROWSER} \
+                                -e WORKERS=${env.WORKERS} \
+                                -e HEADLESS=${env.HEADLESS} \
+                                -e COVERAGE=${params.COVERAGE} \
+                                playwright || true
+                        """
                     }
                 }
             }
