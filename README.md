@@ -55,15 +55,18 @@ You can configure and run Playwright tests using environment variables defined i
 
 Create a `.env` file in the root of your project with the following content:
 
+The suite is the name of the test plan *.specs.ts in the folder tests.
 ```env
 SUITE=login
 BROWSER=chrome
 WORKERS=1
+HEADLESS=true
 ```
 
 ## Run with .env file
+You can use the scripts in the package.json for example: test:login-suite
 ```bash
-npx dotenv -e .env -- npm run test
+npx dotenv -e .env -- npm run test:login-suite
 ```
 
 ## Run sonar-scanner in Local Environment:
