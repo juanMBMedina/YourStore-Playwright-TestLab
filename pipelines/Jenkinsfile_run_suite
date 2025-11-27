@@ -42,9 +42,18 @@ pipeline {
             steps {
                 dir("${env.TEMP_DIR}") {
                     echo "Changed directory to: ${env.TEMP_DIR}"
+                    env.HEADLESS = true
                     script {
-                        echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER}"
-                        sh "docker compose -f docker-compose.playwright.yml run --rm -e SUITE=${env.SUITE} -e BROWSER=${env.BROWSER} -e COVERAGE=${params.COVERAGE} playwright || true"
+                        echo "Running Playwright tests for suite: ${env.SUITE} on browser: ${env.BROWSER} in mode headless=${env.HEADLESS} with ${env.WORKERS} workers. Coverage: ${params.COVERAGE}"
+                        sh """
+                            docker compose -f docker-compose.playwright.yml run --rm \
+                                -e SUITE=${env.SUITE} \
+                                -e BROWSER=${env.BROWSER} \
+                                -e WORKERS=${env.WORKERS} \
+                                -e HEADLESS=${env.HEADLESS} \
+                                -e COVERAGE=${params.COVERAGE} \
+                                playwright || true
+                        """
                     }
                 }
             }

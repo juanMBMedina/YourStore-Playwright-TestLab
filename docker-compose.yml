@@ -78,7 +78,7 @@ volumes:
   cypress_src:
     name: cypress_src
   playwright_src:
-    name: playwright_src 
+    name: playwright_src
 
 networks:
   project-network:
